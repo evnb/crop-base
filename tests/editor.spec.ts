@@ -1,13 +1,23 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 test.describe('Photo Editor', () => {
     test.beforeEach(async ({ page }) => {
         // Start from a fresh page for each test
-        await page.goto('http://localhost:8000');
+        await page.goto('http://localhost:8000/src/index.html');
+        // Wait for DOM content to be loaded
+        await page.waitForLoadState('domcontentloaded');
     });
 
     test('should load with initial state', async ({ page }) => {
+        // Wait for specific elements to be ready
+        await page.waitForSelector('#uploadButton', { state: 'visible' });
+        await page.waitForSelector('#imageCanvas', { state: 'visible' });
+        
         // Check initial UI elements
         await expect(page.locator('#uploadButton')).toBeVisible();
         await expect(page.locator('#imageCanvas')).toBeVisible();
