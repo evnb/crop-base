@@ -26,6 +26,44 @@ The cropperjs submodule contains our local modifications in these commits:
 - Submodule has been removed intentionally
 - Will contain our custom cropping solution
 
+## Submodule Management
+
+### Adding a Submodule
+```powershell
+git submodule add <repository-url> lib/submodule-name
+git submodule update --init --recursive
+```
+
+### Removing a Submodule
+Follow these steps in order:
+1. Remove submodule configuration from .gitmodules:
+```powershell
+git config -f .gitmodules --remove-section submodule.lib/cropperjs
+```
+
+2. Remove from git's config:
+```powershell
+git config --remove-section submodule.lib/cropperjs
+```
+
+3. Remove the submodule directory and its git modules:
+```powershell
+Remove-Item -Recurse -Force lib/cropperjs -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force .git/modules/lib/cropperjs -ErrorAction SilentlyContinue
+```
+
+4. Remove from git's index and commit:
+```powershell
+git rm --cached lib/cropperjs
+git add .gitmodules
+git commit -m "chore: remove submodule"
+```
+
+Note: If you encounter a git index.lock error, you may need to:
+1. Close any programs accessing the git repository
+2. Remove the lock file: `Remove-Item .git/index.lock -Force`
+3. Then continue with the steps above
+
 ## Project Layout
 
 ```
