@@ -41,15 +41,16 @@ document.addEventListener('DOMContentLoaded', function () {
             event.detail.height = height;
         },
         zoom(event) {
-            // Log zoom level for debugging
-            console.log('Zoom ratio:', event.detail.ratio);
-            
+            // Store both crop box and crop data before zoom
             const cropBoxData = cropper.getCropBoxData();
-            const canvasData = cropper.getCanvasData();
-            console.log('Crop box:', cropBoxData);
-            console.log('Canvas:', canvasData);
+            const cropData = cropper.getData(true); // true = rounded values
+            
+            console.log('Zoom ratio:', event.detail.ratio);
+            console.log('Crop data before zoom:', cropData);
             
             setTimeout(() => {
+                // Restore both the visual box and the actual crop coordinates
+                cropper.setData(cropData);
                 cropper.setCropBoxData(cropBoxData);
             }, 0);
         },
