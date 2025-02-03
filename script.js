@@ -2,6 +2,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const image = document.getElementById('image');
     const preview = document.getElementById('preview');
     const fileInput = document.getElementById('fileInput');
+    // Add references to the info elements
+    const cropX = document.getElementById('cropX');
+    const cropY = document.getElementById('cropY');
+    const cropWidth = document.getElementById('cropWidth');
+    const cropHeight = document.getElementById('cropHeight');
     let cropper = null;
 
     // Initialize cropper options
@@ -18,9 +23,31 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleDragModeOnDblclick: false,
         zoomOnWheel: true,
         wheelZoomRatio: 0.1,
+        crop(event) {
+            // Round and update the display
+            const x = Math.round(event.detail.x);
+            const y = Math.round(event.detail.y);
+            const width = Math.round(event.detail.width);
+            const height = Math.round(event.detail.height);
+            
+            cropX.textContent = x;
+            cropY.textContent = y;
+            cropWidth.textContent = width;
+            cropHeight.textContent = height;
+
+            event.detail.x = x;
+            event.detail.y = y;
+            event.detail.width = width;
+            event.detail.height = height;
+        },
         zoom(event) {
+            // Log zoom level for debugging
+            console.log('Zoom ratio:', event.detail.ratio);
+            
             const cropBoxData = cropper.getCropBoxData();
-            event.detail.ratio;
+            const canvasData = cropper.getCanvasData();
+            console.log('Crop box:', cropBoxData);
+            console.log('Canvas:', canvasData);
             
             setTimeout(() => {
                 cropper.setCropBoxData(cropBoxData);
@@ -33,12 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
             cropBoxData.width = Math.round(cropBoxData.width);
             cropBoxData.height = Math.round(cropBoxData.height);
             cropper.setCropBoxData(cropBoxData);
-        },
-        crop(event) {
-            event.detail.x = Math.round(event.detail.x);
-            event.detail.y = Math.round(event.detail.y);
-            event.detail.width = Math.round(event.detail.width);
-            event.detail.height = Math.round(event.detail.height);
         }
     };
 
