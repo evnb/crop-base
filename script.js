@@ -41,17 +41,15 @@ document.addEventListener('DOMContentLoaded', function () {
             event.detail.height = height;
         },
         zoom(event) {
-            // Store both crop box and crop data before zoom
-            const cropBoxData = cropper.getCropBoxData();
+            // Store the pixel-based crop coordinates before zoom
             const cropData = cropper.getData(true); // true = rounded values
             
             console.log('Zoom ratio:', event.detail.ratio);
             console.log('Crop data before zoom:', cropData);
             
             setTimeout(() => {
-                // Restore both the visual box and the actual crop coordinates
+                // Only restore the actual pixel coordinates, let cropper calculate the visual box
                 cropper.setData(cropData);
-                cropper.setCropBoxData(cropBoxData);
             }, 0);
         },
         ready() {
