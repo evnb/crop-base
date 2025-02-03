@@ -12,13 +12,22 @@
   3. Added view mode constants for image rendering
 - Branch preserved for reference but no longer active
 
-### custom-cropper (Current)
+### custom-cropper (Historical)
 - Fresh implementation without external dependencies
 - Custom cropping solution from scratch
 - Goals:
   1. Allow crop box to extend beyond visible area
   2. Maintain absolute pixel coordinates during zoom
   3. Separate view panning from crop box movement
+
+### attempt2 (Current)
+- Second fresh implementation focusing on pixel-perfect precision
+- Building from scratch with clean architecture
+- Key focus areas:
+  1. Pixel-perfect crop box positioning and movement
+  2. Clean separation between view panning and crop box controls
+  3. Support for crop box extending beyond visible area
+  4. Precise pixel coordinate management during zoom operations
 
 ## Project Layout
 
