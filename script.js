@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const image = document.getElementById('image');
+    const preview = document.getElementById('preview');
     const fileInput = document.getElementById('fileInput');
     let cropper = null;
 
@@ -68,15 +69,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 const croppedCanvas = cropper.getCroppedCanvas({
                     imageSmoothingEnabled: false
                 });
-                
-                // Create a download link for the cropped image
-                const link = document.createElement('a');
-                link.download = 'cropped-image.png';
-                link.href = croppedCanvas.toDataURL('image/png');
-                link.click();
+                preview.src = croppedCanvas.toDataURL('image/png');
+                break;
+            case 'download':
+                if (preview.src) {
+                    const link = document.createElement('a');
+                    link.download = 'cropped-image.png';
+                    link.href = preview.src;
+                    link.click();
+                }
                 break;
             case 'reset':
                 cropper.reset();
+                preview.src = '';
                 break;
         }
     });

@@ -88,4 +88,20 @@ button:hover {
 .cropper-view-box,
 .cropper-face {
     image-rendering: pixelated;
+}
+
+.preview-container {
+    padding: 16px;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+}
+
+.preview-image {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.preview-image img {
+    max-width: 100%;
+    image-rendering: pixelated;
 } 
