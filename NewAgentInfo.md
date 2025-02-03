@@ -24,7 +24,10 @@ PhotoEditWebApp/
 - See [DevProgress.md](DevProgress.md) for current status, goals, challenges, and next steps.
 
 ## End Goal
-- Create a photo editor that maintains exact pixel coordinates when cropping
-- Allow users to pan around a large image while keeping crop box position fixed to the image
-- Enable crop box to extend beyond visible area
-- Ensure pixel-perfect precision in final cropped image
+- Create a mobile-friendly static-site webapp photo cropper. When a user adds a photo, the crop should be determined automatically based on an algorithm I will write.
+- User should be allowed to edit the crop before it goes into effect
+  - UI Editor that maintains exact pixel coordinates when cropping.
+  - Allow users to pan around a large image while keeping crop box position fixed to the image
+  - Enable crop box to extend beyond visible area
+  - Ensure pixel-perfect precision in final cropped image
+  - Ensure that if the image is scaled for a preview it will be in nearest neighbor to be pixel perfect, not a blurry mess.
