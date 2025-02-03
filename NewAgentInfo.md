@@ -3,39 +3,28 @@
 ## Project Overview
 - Building a pixel-perfect photo editor web app
 - Main repo is private/local
-- Using cropperjs fork as submodule (see [SubmoduleReadme.md](SubmoduleReadme.md) for details)
+- Starting fresh implementation (see [ProjectStructureNotes.md](ProjectStructureNotes.md) for history of attempts)
 
 ## Important Documents
 1. [DevProgress.md](DevProgress.md) - Track development progress and current challenges
-2. [SubmoduleReadme.md](SubmoduleReadme.md) - Documentation of cropperjs modifications
-3. [ProjectStructureNotes.md](ProjectStructureNotes.md) - Project structure, branch organization, and submodule management
+2. [ProjectStructureNotes.md](ProjectStructureNotes.md) - Project structure, branch organization, and implementation history
 
 ## Project Structure
-Please read ProjectStructureNotes.md first to understand:
-- Branch organization (crop-box-attempt1 vs custom-cropper)
-- Submodule management in different branches
-- How to access modified cropperjs code
-- Project layout and documentation structure
-
 ```
-photo-editor/
-├── lib/
-│   └── cropperjs/     # Our forked submodule
+PhotoEditWebApp/
 ├── index.html         # Main app interface
 ├── script.js         # App logic
-├── styles.css        # App styling
-└── SubmoduleReadme.md # Git submodule documentation
+└── styles.css        # App styling
 ```
 
 ## Reference Projects
-- [fengyuanchen/photo-editor](https://github.com/fengyuanchen/photo-editor) - Example project using cropperjs
-- Shows how cropperjs can be integrated into a full photo editing application
- 
+[Example section - will be populated as we identify relevant projects]
+
 ## Current Status and Challenges
-- See [DevProgress.md](DevProgress.md) for current status, goals,challenges, and next steps.
+- See [DevProgress.md](DevProgress.md) for current status, goals, challenges, and next steps.
 
 ## End Goal
 - Create a photo editor that maintains exact pixel coordinates when cropping
-- Allow users to pan around a large image while keeping crop box position fixed
-- Enable crop box to extend beyond visible area (current challenge)
+- Allow users to pan around a large image while keeping crop box position fixed to the image
+- Enable crop box to extend beyond visible area
 - Ensure pixel-perfect precision in final cropped image
