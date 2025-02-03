@@ -15,8 +15,17 @@ document.addEventListener('DOMContentLoaded', function () {
         cropBoxMovable: true,
         cropBoxResizable: true,
         toggleDragModeOnDblclick: false,
+        zoomOnWheel: true,
+        wheelZoomRatio: 0.1,
+        zoom(event) {
+            const cropBoxData = cropper.getCropBoxData();
+            event.detail.ratio;
+            
+            setTimeout(() => {
+                cropper.setCropBoxData(cropBoxData);
+            }, 0);
+        },
         ready() {
-            // Snap crop box to pixel grid
             const cropBoxData = cropper.getCropBoxData();
             cropBoxData.left = Math.round(cropBoxData.left);
             cropBoxData.top = Math.round(cropBoxData.top);
@@ -25,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function () {
             cropper.setCropBoxData(cropBoxData);
         },
         crop(event) {
-            // Ensure crop box snaps to pixel grid while dragging
             event.detail.x = Math.round(event.detail.x);
             event.detail.y = Math.round(event.detail.y);
             event.detail.width = Math.round(event.detail.width);
