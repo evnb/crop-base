@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# TypeScript build output
+/dist/
+*.js.map
+*.tsbuildinfo
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/tests-examples/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Cache directories
+.npm/
+.eslintcache
+
+# Test coverage
+/coverage/
