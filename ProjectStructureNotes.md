@@ -1,86 +1,69 @@
 # Project Structure Notes
 
-## Branch Organization
+## Branch History
 
-### crop-box-attempt1
+### crop-box-attempt1 (Historical)
 - First attempt at implementing pixel-perfect photo editing
-- Contains cropperjs as a submodule in `lib/cropperjs/`
-- Submodule contains local commits with our modifications (not pushed to remote)
-- See [SubmoduleReadme.md](SubmoduleReadme.md) for details on cropperjs modifications
+- Used cropperjs as a submodule in `lib/cropperjs/`
+- Contained local commits with cropperjs modifications (not pushed to remote)
+- Key modifications attempted:
+  1. Enhanced pixel view mode rendering
+  2. Modified canvas and crop box interactions
+  3. Added view mode constants for image rendering
+- Branch preserved for reference but no longer active
 
-#### Accessing the Modified Submodule
-After checking out the branch:
-```powershell
-git checkout crop-box-attempt1
-git submodule update --init --recursive
-```
-
-#### Important Submodule Commits
-The cropperjs submodule contains our local modifications in these commits:
-1. 51f706b - "refactor: enhance pixel view mode rendering and CSS for crop box interactions"
-2. c7abf0d - "feat: implement pixel view mode with enhanced canvas and crop box interactions"
-3. 148194 - "feat: add view mode constants for image rendering"
-
-### custom-cropper
-- Fresh implementation attempt without using cropperjs
-- Submodule has been removed intentionally
-- Will contain our custom cropping solution
-
-## Submodule Management
-
-### Adding a Submodule
-```powershell
-git submodule add <repository-url> lib/submodule-name
-git submodule update --init --recursive
-```
-
-### Removing a Submodule
-Follow these steps in order:
-1. Remove submodule configuration from .gitmodules:
-```powershell
-git config -f .gitmodules --remove-section submodule.lib/cropperjs
-```
-
-2. Remove from git's config:
-```powershell
-git config --remove-section submodule.lib/cropperjs
-```
-
-3. Remove the submodule directory and its git modules:
-```powershell
-Remove-Item -Recurse -Force lib/cropperjs -ErrorAction SilentlyContinue
-Remove-Item -Recurse -Force .git/modules/lib/cropperjs -ErrorAction SilentlyContinue
-```
-
-4. Remove from git's index and commit:
-```powershell
-git rm --cached lib/cropperjs
-git add .gitmodules
-git commit -m "chore: remove submodule"
-```
-
-Note: If you encounter a git index.lock error, you may need to:
-1. Close any programs accessing the git repository
-2. Remove the lock file: `Remove-Item .git/index.lock -Force`
-3. Then continue with the steps above
+### custom-cropper (Current)
+- Fresh implementation without external dependencies
+- Custom cropping solution from scratch
+- Goals:
+  1. Allow crop box to extend beyond visible area
+  2. Maintain absolute pixel coordinates during zoom
+  3. Separate view panning from crop box movement
 
 ## Project Layout
 
 ```
 PhotoEditWebApp/
-├── lib/                          # Libraries
-│   └── cropperjs/               # (Only in crop-box-attempt1 branch)
+├── lib/                          # Libraries and custom components
+├── index.html                    # Main HTML file
+├── styles.css                    # Global styles
+├── script.js                     # Main JavaScript file
 ├── DevProgress.md               # Development progress tracking
-├── SubmoduleReadme.md          # Cropperjs modification details
 └── ProjectStructureNotes.md     # This file - Project structure documentation
 ```
 
-## Important Notes
-1. The cropperjs submodule and its modifications are preserved in the `crop-box-attempt1` branch
-2. Switching between branches:
-   - To `crop-box-attempt1`: Remember to run submodule update command
-   - To `custom-cropper`: Clean implementation without submodule
+## Implementation History
+
+### First Attempt (crop-box-attempt1)
+- Used cropperjs library as a submodule
+- Attempted modifications to support pixel-perfect editing
+- Challenges encountered:
+  1. Crop box positioning tied to container rather than image
+  2. Complex coordinate transformation system
+  3. Difficulty extending crop box beyond visible area
+  4. Tight coupling between panning and crop box movement
+
+### Current Implementation (custom-cropper)
+- Fresh start with custom solution
+- Key design principles:
+  1. Separation of concerns between view and crop box
+  2. Direct pixel coordinate management
+  3. Unrestricted crop box movement
+  4. Clean architecture without external dependencies
 
 ## Related Documentation
-- [DevProgress.md](DevProgress.md) - Detailed progress tracking
-- [SubmoduleReadme.md](SubmoduleReadme.md) - Cropperjs modifications documentation 
+- [DevProgress.md](DevProgress.md) - Current development progress
+- Historical documentation has been archived in this file
+
+## Git Operations Reference
+
+### Branch Management
+```powershell
+# View current branch
+git branch
+
+# Switch to custom-cropper branch
+git checkout custom-cropper
+```
+
+Note: The cropperjs submodule has been removed from the project. Historical reference of the implementation attempt is preserved in the crop-box-attempt1 branch. 
