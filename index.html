@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Perfect Photo Editor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Photo Editor</h1>
+            <div class="upload-container">
+                <input type="file" id="imageInput" accept="image/*" class="hidden">
+                <button id="uploadButton" class="primary-button">Upload Image</button>
+            </div>
+        </header>
+
+        <main class="editor-container">
+            <div class="canvas-container">
+                <!-- Canvas will be inserted here via JavaScript -->
+                <div id="imageContainer" class="image-container">
+                    <canvas id="imageCanvas"></canvas>
+                    <div id="cropBox" class="crop-box">
+                        <div class="crop-box-handle top-left"></div>
+                        <div class="crop-box-handle top-right"></div>
+                        <div class="crop-box-handle bottom-left"></div>
+                        <div class="crop-box-handle bottom-right"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-container">
+                <div class="zoom-controls">
+                    <button id="zoomOut" class="control-button">-</button>
+                    <span id="zoomLevel">100%</span>
+                    <button id="zoomIn" class="control-button">+</button>
+                </div>
+                <div class="position-info">
+                    <div class="coordinate-display">
+                        <span>X: <span id="cropX">0</span>px</span>
+                        <span>Y: <span id="cropY">0</span>px</span>
+                    </div>
+                    <div class="size-display">
+                        <span>W: <span id="cropWidth">0</span>px</span>
+                        <span>H: <span id="cropHeight">0</span>px</span>
+                    </div>
+                </div>
+                <button id="applyCrop" class="primary-button" disabled>Apply Crop</button>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
