@@ -1,3 +1,11 @@
+/**
+ * PixelPerfectEditor - A class that handles pixel-perfect image editing operations
+ * Features:
+ * - Precise pixel coordinate tracking during zoom and pan
+ * - Nearest neighbor scaling for crisp image display
+ * - Crop box with exact pixel position maintenance
+ * - Smooth pan and zoom controls
+ */
 class PixelPerfectEditor {
     constructor() {
         // DOM Elements
