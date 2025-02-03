@@ -68,9 +68,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const croppedCanvas = cropper.getCroppedCanvas({
                     imageSmoothingEnabled: false
                 });
-                const dataUrl = croppedCanvas.toDataURL('image/png');
-                // You can handle the cropped image data here
-                console.log('Cropped image data:', dataUrl);
+                
+                // Create a download link for the cropped image
+                const link = document.createElement('a');
+                link.download = 'cropped-image.png';
+                link.href = croppedCanvas.toDataURL('image/png');
+                link.click();
                 break;
             case 'reset':
                 cropper.reset();
