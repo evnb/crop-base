@@ -5,6 +5,7 @@ node_modules/
 /dist/
 *.js.map
 *.tsbuildinfo
+/src/**/*.js
 
 # Playwright
 /test-results/
