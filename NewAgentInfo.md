@@ -8,13 +8,18 @@
 ## Important Documents
 1. [DevProgress.md](DevProgress.md) - Track development progress and current challenges
 2. [ProjectStructureNotes.md](ProjectStructureNotes.md) - Project structure, branch organization, and implementation history
+3. [TestingGuide.md](TestingGuide.md) - Comprehensive guide for testing setup, procedures, and best practices
 
 ## Project Structure
 ```
 PhotoEditWebApp/
-├── index.html         # Main app interface
-├── script.js         # App logic
-└── styles.css        # App styling
+├── src/                         # Source directory
+│   ├── index.html              # Main app interface
+│   ├── script.ts               # App logic
+│   └── styles.css              # App styling
+├── tests/                      # Test directory
+│   └── editor.spec.ts          # Playwright tests
+└── dist/                       # Compiled output
 ```
 
 ## Reference Projects
@@ -22,6 +27,7 @@ PhotoEditWebApp/
 
 ## Current Status and Challenges
 - See [DevProgress.md](DevProgress.md) for current status, goals, challenges, and next steps.
+- See [TestingGuide.md](TestingGuide.md) for testing infrastructure and procedures.
 
 ## End Goal
 - Create a mobile-friendly static-site webapp photo cropper. When a user adds a photo, the crop should be determined automatically based on an algorithm I will write.
