@@ -5,7 +5,18 @@
 - Main repo is private/local
 - Using cropperjs fork as submodule (see [SubmoduleReadme.md](SubmoduleReadme.md) for details)
 
+## Important Documents
+1. [DevProgress.md](DevProgress.md) - Track development progress and current challenges
+2. [SubmoduleReadme.md](SubmoduleReadme.md) - Documentation of cropperjs modifications
+3. [ProjectStructureNotes.md](ProjectStructureNotes.md) - Project structure, branch organization, and submodule management
+
 ## Project Structure
+Please read ProjectStructureNotes.md first to understand:
+- Branch organization (crop-box-attempt1 vs custom-cropper)
+- Submodule management in different branches
+- How to access modified cropperjs code
+- Project layout and documentation structure
+
 ```
 photo-editor/
 ├── lib/
