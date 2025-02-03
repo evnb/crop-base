@@ -4,6 +4,11 @@
 
 Git submodules allow you to keep a Git repository as a subdirectory of another Git repository. They let you clone another repository into your project and keep your commits separate.
 
+## Our Cropperjs Fork
+- Repository: https://github.com/evnb/cropperjs.git
+- Added VIEW_MODE_PIXEL mode for pixel-perfect cropping
+- Fork is public, main repo is private
+
 ### Key Concepts
 
 - A submodule is a repository embedded inside another repository
@@ -41,13 +46,13 @@ git submodule update --remote lib/cropperjs
 
 ### Project Structure
 ```
-image-editor/           # Main project
+photo-editor/
 ├── lib/
-│   └── cropperjs/      # Submodule
+│   └── cropperjs/     # Our forked submodule
 ├── index.html
-├── styles.css
-├── script.js
-└── SubmoduleReadme.md
+├── script.js         # App logic
+├── styles.css        # App styling
+└── SubmoduleReadme.md # Git submodule documentation
 ```
 
 ### Setup Steps

@@ -25,7 +25,11 @@
 - Outside crop box -> pan view
 - Working as expected
 
+## Current Challenge
+The crop box is still constrained despite removing constraints in limitCropBox method. Need to investigate where else constraints might be enforced. 
+
 ## Next Steps
 1. Debug why crop box still can't extend beyond visible area
    - Add logging to track when/where constraints are applied
    - Review all methods that modify crop box position/size
+
