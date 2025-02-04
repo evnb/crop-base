@@ -118,8 +118,6 @@ class PixelPerfectEditor {
     }
 
     private initializeEventListeners(): void {
-        console.log('Initializing event listeners');
-        
         // Upload handling
         this.uploadButton.addEventListener('click', () => this.imageInput.click());
         this.imageInput.addEventListener('change', (e) => this.handleImageUpload(e));
@@ -129,50 +127,17 @@ class PixelPerfectEditor {
         this.zoomOutBtn.addEventListener('click', () => this.zoom(0.8));
 
         // Canvas interaction events
-        this.imageCanvas.addEventListener('mousedown', (e) => {
-            console.log('Canvas mousedown');
-            this.handleCanvasMouseDown(e);
-        });
-        
-        // Document-level mouse events
-        document.addEventListener('mousemove', (e) => {
-            if (this.isDraggingCropBox || this.isDraggingCanvas) {
-                console.log('Mouse move with dragging:', {
-                    isDraggingCropBox: this.isDraggingCropBox,
-                    isDraggingCanvas: this.isDraggingCanvas
-                });
-            }
-            this.handleMouseMove(e);
-        });
-        
-        document.addEventListener('mouseup', (e) => {
-            console.log('Document mouseup');
-            this.handleMouseUp(e);
-        });
-        
-        // Canvas wheel event
+        this.imageCanvas.addEventListener('mousedown', this.handleCanvasMouseDown.bind(this));
+        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
         this.imageCanvas.addEventListener('wheel', (e) => this.handleCanvasWheel(e));
 
         // Crop box interaction events
-        console.log('Setting up crop box event listeners');
-        this.cropBox.addEventListener('mousedown', (e) => {
-            console.log('Crop box mousedown event:', {
-                target: e.target,
-                currentTarget: e.currentTarget,
-                clientX: e.clientX,
-                clientY: e.clientY
-            });
-            this.handleCropBoxMouseDown(e);
-        });
+        this.cropBox.addEventListener('mousedown', this.handleCropBoxMouseDown.bind(this));
         
-        // Debug click events on crop box
-        this.cropBox.addEventListener('click', (e) => {
-            console.log('Crop box clicked:', {
-                target: e.target,
-                currentTarget: e.currentTarget
-            });
-            e.stopPropagation();
-        });
+        // Prevent crop box events from bubbling to canvas
+        this.cropBox.addEventListener('click', (e) => e.stopPropagation());
+        this.cropBox.addEventListener('wheel', (e) => e.stopPropagation());
     }
 
     private async handleImageUpload(event: Event): Promise<void> {
@@ -186,30 +151,7 @@ class PixelPerfectEditor {
             this.resetView();
             this.initializeCanvas();
             this.render();
-            
-            // Initialize crop box
-            const initialSize = Math.min(image.width, image.height) / 2;
-            this.cropBoxPos = {
-                x: (image.width - initialSize) / 2,
-                y: (image.height - initialSize) / 2,
-                width: initialSize,
-                height: initialSize
-            };
-            
-            // Show crop box and update its position
-            console.log('Showing crop box with position:', this.cropBoxPos);
             this.cropBox.style.display = 'block';
-            this.updateCropBoxDisplay();
-            
-            // Log element visibility
-            console.log('Crop box display style:', this.cropBox.style.display);
-            console.log('Crop box computed style:', window.getComputedStyle(this.cropBox).display);
-            console.log('Crop box dimensions:', {
-                left: this.cropBox.style.left,
-                top: this.cropBox.style.top,
-                width: this.cropBox.style.width,
-                height: this.cropBox.style.height
-            });
         } catch (error) {
             console.error('Error loading image:', error);
         }
@@ -306,23 +248,17 @@ class PixelPerfectEditor {
     }
 
     private handleCropBoxMouseDown(e: MouseEvent): void {
-        console.log('Crop box mouse down:', {
-            clientX: e.clientX,
-            clientY: e.clientY
-        });
-        e.stopPropagation();
+        e.stopPropagation(); // Prevent canvas drag from starting
+        e.preventDefault(); // Prevent any default behavior
         this.isDraggingCropBox = true;
         this.isDraggingCanvas = false;
         
         // Store initial positions for relative movement
         this.dragStartCropBox = {
-            x: this.cropBoxPos.x,
-            y: this.cropBoxPos.y
-        };
-        this.dragStart = {
             x: e.clientX,
             y: e.clientY
         };
+        this.dragStartCanvasOffset = { ...this.panOffset };
     }
 
     private handleCanvasMouseDown(e: MouseEvent): void {
@@ -342,20 +278,19 @@ class PixelPerfectEditor {
         if (!this.isDraggingCropBox && !this.isDraggingCanvas) return;
 
         if (this.isDraggingCropBox) {
-            console.log('Moving crop box:', {
-                clientX: e.clientX,
-                clientY: e.clientY,
-                dragStart: this.dragStart,
-                dragStartCropBox: this.dragStartCropBox
-            });
+            // Calculate relative movement
+            const deltaX = e.clientX - this.dragStartCropBox.x;
+            const deltaY = e.clientY - this.dragStartCropBox.y;
             
-            // Calculate relative movement in screen coordinates
-            const deltaX = (e.clientX - this.dragStart.x) / this.zoomLevel;
-            const deltaY = (e.clientY - this.dragStart.y) / this.zoomLevel;
+            // Update crop box position in image coordinates
+            const newX = this.cropBoxPos.x + deltaX / this.zoomLevel;
+            const newY = this.cropBoxPos.y + deltaY / this.zoomLevel;
             
-            // Update crop box position relative to its starting position
-            const newX = this.dragStartCropBox.x + deltaX;
-            const newY = this.dragStartCropBox.y + deltaY;
+            // Update drag start for next move
+            this.dragStartCropBox = {
+                x: e.clientX,
+                y: e.clientY
+            };
             
             // Apply bounds checking
             if (this.image) {
@@ -390,17 +325,11 @@ class PixelPerfectEditor {
     }
 
     private handleMouseUp(e: MouseEvent): void {
-        console.log('Mouse up:', {
-            wasDraggingCropBox: this.isDraggingCropBox,
-            wasDraggingCanvas: this.isDraggingCanvas,
-            finalPosition: this.cropBoxPos
-        });
-        
         if (this.isDraggingCropBox || this.isDraggingCanvas) {
-            e.preventDefault();
+            e.preventDefault(); // Prevent any default behavior
             this.isDraggingCropBox = false;
             this.isDraggingCanvas = false;
-            this.render();
+            this.render(); // Ensure final render
         }
     }
 
