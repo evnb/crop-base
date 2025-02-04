@@ -117,32 +117,40 @@ test.describe('Photo Editor', () => {
 
         // Helper function to wait for position update
         const waitForPanUpdate = async (initialOffset: Point) => {
-            // Instead of waiting for a function, we'll use the timeout we added
             await page.waitForTimeout(100);
             
-            // Verify the position has actually changed
+            // Get and log current position for debugging
             const currentPos = await getPanOffset();
-            const dx = currentPos.x - initialOffset.x;
-            const dy = currentPos.y - initialOffset.y;
+            console.log('Pan movement:', {
+                dx: currentPos.x - initialOffset.x,
+                dy: currentPos.y - initialOffset.y,
+                current: currentPos,
+                initial: initialOffset
+            });
             
-            if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+            if (Math.abs(currentPos.x - initialOffset.x) <= 1 && Math.abs(currentPos.y - initialOffset.y) <= 1) {
                 throw new Error('Pan offset did not change enough');
             }
         };
 
-        const canvas = page.locator('#imageCanvas');
-        const canvasBox = await canvas.boundingBox();
-        if (!canvasBox) throw new Error('Canvas not found');
+        // Get canvas container bounds to ensure we stay within them
+        const container = page.locator('.canvas-container');
+        const containerBox = await container.boundingBox();
+        if (!containerBox) throw new Error('Canvas container not found');
 
-        // Start from center
-        const centerX = canvasBox.x + canvasBox.width / 2;
-        const centerY = canvasBox.y + canvasBox.height / 2;
-        await page.mouse.move(centerX, centerY);
+        // Calculate safe coordinates within the container
+        const startX = containerBox.x + containerBox.width / 4;
+        const startY = containerBox.y + containerBox.height / 4;
+        const endX = containerBox.x + (containerBox.width * 3) / 4;
+        const endY = containerBox.y + (containerBox.height * 3) / 4;
+
+        // Move to start position
+        await page.mouse.move(startX, startY);
+        const initialOffset = await getPanOffset();
 
         // Test panning right (canvas moves left)
-        const initialOffset = await getPanOffset();
         await page.mouse.down();
-        await page.mouse.move(centerX + 100, centerY, { steps: 10 });
+        await page.mouse.move(endX, startY, { steps: 10 });
         await page.mouse.up();
         await waitForPanUpdate(initialOffset);
         const rightPanOffset = await getPanOffset();
@@ -150,16 +158,18 @@ test.describe('Photo Editor', () => {
         expect(Math.abs(rightPanOffset.y - initialOffset.y)).toBeLessThan(5);
 
         // Test panning down (canvas moves up)
+        await page.mouse.move(startX, startY);
         await page.mouse.down();
-        await page.mouse.move(centerX + 100, centerY + 100, { steps: 10 });
+        await page.mouse.move(startX, endY, { steps: 10 });
         await page.mouse.up();
         await waitForPanUpdate(rightPanOffset);
         const downPanOffset = await getPanOffset();
         expect(downPanOffset.y).toBeLessThan(rightPanOffset.y);
 
         // Test panning left (canvas moves right)
+        await page.mouse.move(endX, endY);
         await page.mouse.down();
-        await page.mouse.move(centerX, centerY + 100, { steps: 10 });
+        await page.mouse.move(startX, endY, { steps: 10 });
         await page.mouse.up();
         await waitForPanUpdate(downPanOffset);
         const leftPanOffset = await getPanOffset();
@@ -183,41 +193,53 @@ test.describe('Photo Editor', () => {
 
         // Helper function to wait for position update
         const waitForPositionUpdate = async (initialPos: { cropBox: CropBox }) => {
-            // Instead of waiting for a function, we'll use the timeout we added
             await page.waitForTimeout(100);
             
-            // Verify the position has actually changed
+            // Get and log current position for debugging
             const currentPos = await getPositions();
-            const dx = currentPos.cropBox.x - initialPos.cropBox.x;
-            const dy = currentPos.cropBox.y - initialPos.cropBox.y;
+            console.log('Crop box movement:', {
+                dx: currentPos.cropBox.x - initialPos.cropBox.x,
+                dy: currentPos.cropBox.y - initialPos.cropBox.y,
+                current: currentPos.cropBox,
+                initial: initialPos.cropBox
+            });
             
-            if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+            if (Math.abs(currentPos.cropBox.x - initialPos.cropBox.x) <= 1 && 
+                Math.abs(currentPos.cropBox.y - initialPos.cropBox.y) <= 1) {
                 throw new Error('Position did not change enough');
             }
         };
 
-        // Get initial position
+        // Get crop box and ensure it's within canvas container
         const cropBox = page.locator('#cropBox');
         await expect(cropBox).toBeVisible();
         const cropBoxBounds = await cropBox.boundingBox();
         if (!cropBoxBounds) throw new Error('Crop box not found');
 
-        // Start from center of crop box
-        const centerX = cropBoxBounds.x + cropBoxBounds.width / 2;
-        const centerY = cropBoxBounds.y + cropBoxBounds.height / 2;
-        await page.mouse.move(centerX, centerY);
+        const container = page.locator('.canvas-container');
+        const containerBox = await container.boundingBox();
+        if (!containerBox) throw new Error('Canvas container not found');
+
+        // Ensure we're clicking within both the container and crop box
+        const startX = Math.max(containerBox.x, cropBoxBounds.x + cropBoxBounds.width / 4);
+        const startY = Math.max(containerBox.y, cropBoxBounds.y + cropBoxBounds.height / 4);
+        const endX = Math.min(containerBox.x + containerBox.width, startX + 50);
+        const endY = Math.min(containerBox.y + containerBox.height, startY + 50);
+
+        // Start from within crop box
+        await page.mouse.move(startX, startY);
         const initialPos = await getPositions();
 
         // Move crop box
         await page.mouse.down();
-        await page.mouse.move(centerX + 50, centerY + 50, { steps: 10 });
+        await page.mouse.move(endX, endY, { steps: 10 });
         await page.mouse.up();
         await waitForPositionUpdate(initialPos);
 
         // Get final positions
         const newPos = await getPositions();
 
-        // Verify position changes with tolerance
+        // Verify position changes
         expect(newPos.cropBox.x).toBeGreaterThan(initialPos.cropBox.x);
         expect(newPos.cropBox.y).toBeGreaterThan(initialPos.cropBox.y);
         expect(Math.abs(newPos.cropBox.x - initialPos.cropBox.x)).toBeGreaterThan(10);
