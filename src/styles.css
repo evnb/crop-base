@@ -145,13 +145,13 @@ body {
 
 /* Make the base handles span the full width/height */
 .top-edge, .bottom-edge {
-    width: calc(100% - 20px);  /* Full width minus space for corner handles */
+    width: calc(100% - 10px);  /* Full width minus corner radii (5px on each side) */
     height: 10px;
     left: 10px;  /* Space for corner handle */
 }
 
 .left-edge, .right-edge {
-    height: calc(100% - 20px);  /* Full height minus space for corner handles */
+    height: calc(100% - 10px);  /* Full height minus corner radii (5px on each side) */
     width: 10px;
     top: 10px;  /* Space for corner handle */
     cursor: ew-resize;
