@@ -145,15 +145,15 @@ body {
 
 /* Make the base handles span the full width/height */
 .top-edge, .bottom-edge {
-    width: calc(100% - 10px);  /* Full width minus corner radii (5px on each side) */
+    width: calc(100% - 20px);  /* Full width minus corner handles (10px on each side) */
     height: 10px;
-    left: 10px;  /* Space for corner handle */
+    left: 5px;  /* Half of corner handle width to center */
 }
 
 .left-edge, .right-edge {
-    height: calc(100% - 10px);  /* Full height minus corner radii (5px on each side) */
+    height: calc(100% - 20px);  /* Full height minus corner handles (10px on each side) */
     width: 10px;
-    top: 10px;  /* Space for corner handle */
+    top: 5px;  /* Half of corner handle height to center */
     cursor: ew-resize;
 }
 
@@ -171,7 +171,7 @@ body {
     height: 10px;  /* Back to original size */
     left: 50%;
     transform: translateX(-50%);
-    top: -2px;  /* Keep the border offset fix */
+    top: 0;  /* Align with the edge */
 }
 
 .left-edge::after, .right-edge::after {
@@ -179,7 +179,7 @@ body {
     height: 30px;  /* Back to original size */
     top: 50%;
     transform: translateY(-50%);
-    left: -2px;  /* Keep the border offset fix */
+    left: 0;  /* Align with the edge */
 }
 
 .top-edge { top: -5px; }
