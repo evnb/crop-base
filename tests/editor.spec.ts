@@ -73,24 +73,136 @@ test.describe('Photo Editor', () => {
         const imagePath = path.join(__dirname, '../testimages/lewis-fungi-31a2.jpg');
         await page.locator('#imageInput').setInputFiles(imagePath);
 
-        // Get initial transform
-        const getTransform = async () => page.evaluate(() => {
-            const canvas = document.getElementById('imageCanvas') as HTMLCanvasElement;
-            const style = window.getComputedStyle(canvas);
-            return style.transform;
+        // Get initial pan offset
+        const getPanOffset = async () => page.evaluate(() => {
+            const editor = (window as any).editor;
+            return editor.panOffset;
         });
 
-        const initialTransform = await getTransform();
+        const initialOffset = await getPanOffset();
 
         // Perform pan operation
         const canvas = page.locator('#imageCanvas');
         await canvas.hover();
         await page.mouse.down();
-        await page.mouse.move(100, 100);
+        await page.mouse.move(100, 100, { steps: 5 });
+        await page.mouse.up();
         
-        // Verify transform has changed
-        const newTransform = await getTransform();
-        expect(newTransform).not.toBe(initialTransform);
+        // Verify pan offset has changed
+        const newOffset = await getPanOffset();
+        expect(newOffset.x).toBeGreaterThan(initialOffset.x);
+        expect(newOffset.y).toBeGreaterThan(initialOffset.y);
+    });
+
+    test('should handle panning in multiple directions', async ({ page }) => {
+        // Upload image first
+        const imagePath = path.join(__dirname, '../testimages/lewis-fungi-31a2.jpg');
+        await page.locator('#imageInput').setInputFiles(imagePath);
+
+        // Helper function to get pan offset
+        const getPanOffset = async () => page.evaluate(() => {
+            const editor = (window as any).editor;
+            return editor.panOffset;
+        });
+
+        const canvas = page.locator('#imageCanvas');
+        await canvas.hover();
+
+        // Test panning right
+        const initialOffset = await getPanOffset();
+        await page.mouse.down();
+        await page.mouse.move(100, 0, { steps: 5 });
+        await page.mouse.up();
+        const rightPanOffset = await getPanOffset();
+        expect(rightPanOffset.x).toBeGreaterThan(initialOffset.x);
+        expect(rightPanOffset.y).toBe(initialOffset.y);
+
+        // Test panning down
+        await page.mouse.down();
+        await page.mouse.move(100, 100, { steps: 5 });
+        await page.mouse.up();
+        const downPanOffset = await getPanOffset();
+        expect(downPanOffset.y).toBeGreaterThan(rightPanOffset.y);
+
+        // Test panning left
+        await page.mouse.down();
+        await page.mouse.move(0, 100, { steps: 5 });
+        await page.mouse.up();
+        const leftPanOffset = await getPanOffset();
+        expect(leftPanOffset.x).toBeLessThan(downPanOffset.x);
+    });
+
+    test('should handle crop box movement', async ({ page }) => {
+        // Upload image first
+        const imagePath = path.join(__dirname, '../testimages/lewis-fungi-31a2.jpg');
+        await page.locator('#imageInput').setInputFiles(imagePath);
+
+        // Helper function to get crop box position
+        const getCropBoxPosition = async () => page.evaluate(() => {
+            const editor = (window as any).editor;
+            return editor.cropBoxPos;
+        });
+
+        // Get initial position
+        const cropBox = page.locator('#cropBox');
+        await expect(cropBox).toBeVisible();
+        const initialPos = await getCropBoxPosition();
+
+        // Move crop box
+        await cropBox.hover();
+        await page.mouse.down();
+        await page.mouse.move(50, 50, { steps: 5 });
+        await page.mouse.up();
+
+        // Verify new position
+        const newPos = await getCropBoxPosition();
+        expect(newPos.x).toBeGreaterThan(initialPos.x);
+        expect(newPos.y).toBeGreaterThan(initialPos.y);
+
+        // Verify crop box coordinates are updated in display
+        const coordinates = await page.evaluate(() => ({
+            x: parseInt(document.getElementById('cropX')?.textContent || '0'),
+            y: parseInt(document.getElementById('cropY')?.textContent || '0')
+        }));
+        expect(coordinates.x).toBeGreaterThan(initialPos.x);
+        expect(coordinates.y).toBeGreaterThan(initialPos.y);
+    });
+
+    test('should handle crop box movement with zoom', async ({ page }) => {
+        // Upload image first
+        const imagePath = path.join(__dirname, '../testimages/lewis-fungi-31a2.jpg');
+        await page.locator('#imageInput').setInputFiles(imagePath);
+
+        // Zoom in first
+        await page.click('#zoomIn');
+        await expect(page.locator('#zoomLevel')).toHaveText('125%');
+
+        // Get initial position
+        const initialCoords = await page.evaluate(() => {
+            const editor = (window as any).editor;
+            return editor.cropBoxPos;
+        });
+
+        // Move crop box
+        const cropBox = page.locator('#cropBox');
+        await cropBox.hover();
+        await page.mouse.down();
+        await page.mouse.move(100, 100, { steps: 5 });
+        await page.mouse.up();
+
+        // Verify new coordinates accounting for zoom
+        const newCoords = await page.evaluate(() => {
+            const editor = (window as any).editor;
+            return editor.cropBoxPos;
+        });
+
+        // The actual coordinate change should be scaled by zoom level
+        expect(newCoords.x).toBeGreaterThan(initialCoords.x);
+        expect(newCoords.y).toBeGreaterThan(initialCoords.y);
+        
+        // Coordinates should still be whole numbers
+        expect(Number.isInteger(newCoords.x)).toBeTruthy();
+        expect(Number.isInteger(newCoords.y)).toBeTruthy();
     });
 
     test('should maintain pixel-perfect coordinates', async ({ page }) => {

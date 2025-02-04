@@ -36,6 +36,10 @@ class PixelPerfectEditor {
     private cropBoxPos: CropBox = { x: 0, y: 0, width: 0, height: 0 };
     private isDragging: boolean = false;
     private dragStart: Point = { x: 0, y: 0 };
+    private isDraggingCropBox: boolean = false;
+    private isDraggingCanvas: boolean = false;
+    private dragStartCropBox: Point = { x: 0, y: 0 };
+    private dragStartCanvasOffset: Point = { x: 0, y: 0 };
 
     constructor() {
         // DOM Elements
@@ -121,9 +125,16 @@ class PixelPerfectEditor {
 
         // Canvas interaction events
         this.imageCanvas.addEventListener('mousedown', (e) => this.handleCanvasMouseDown(e));
-        this.imageCanvas.addEventListener('mousemove', (e) => this.handleCanvasMouseMove(e));
-        this.imageCanvas.addEventListener('mouseup', () => this.handleCanvasMouseUp());
+        this.imageCanvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.imageCanvas.addEventListener('mouseup', () => this.handleMouseUp());
         this.imageCanvas.addEventListener('wheel', (e) => this.handleCanvasWheel(e));
+
+        // Crop box interaction events
+        this.cropBox.addEventListener('mousedown', (e) => this.handleCropBoxMouseDown(e));
+        
+        // Prevent crop box events from bubbling to canvas
+        this.cropBox.addEventListener('click', (e) => e.stopPropagation());
+        this.cropBox.addEventListener('wheel', (e) => e.stopPropagation());
     }
 
     private async handleImageUpload(event: Event): Promise<void> {
@@ -233,24 +244,51 @@ class PixelPerfectEditor {
         this.cropBox.style.height = `${this.cropBoxPos.height * scale}px`;
     }
 
+    private handleCropBoxMouseDown(e: MouseEvent): void {
+        e.stopPropagation(); // Prevent canvas drag from starting
+        this.isDraggingCropBox = true;
+        this.dragStartCropBox = {
+            x: e.clientX - (this.cropBoxPos.x * this.zoomLevel + this.panOffset.x),
+            y: e.clientY - (this.cropBoxPos.y * this.zoomLevel + this.panOffset.y)
+        };
+    }
+
     private handleCanvasMouseDown(e: MouseEvent): void {
-        this.isDragging = true;
-        this.dragStart = {
+        if (this.isDraggingCropBox) return;
+        this.isDraggingCanvas = true;
+        this.dragStartCanvasOffset = {
             x: e.clientX - this.panOffset.x,
             y: e.clientY - this.panOffset.y
         };
     }
 
-    private handleCanvasMouseMove(e: MouseEvent): void {
-        if (!this.isDragging) return;
-        
-        this.panOffset.x = e.clientX - this.dragStart.x;
-        this.panOffset.y = e.clientY - this.dragStart.y;
-        this.render();
+    private handleMouseMove(e: MouseEvent): void {
+        if (this.isDraggingCropBox) {
+            // Update crop box position
+            const newX = (e.clientX - this.dragStartCropBox.x - this.panOffset.x) / this.zoomLevel;
+            const newY = (e.clientY - this.dragStartCropBox.y - this.panOffset.y) / this.zoomLevel;
+            
+            // Optional: Add bounds checking here
+            if (this.image) {
+                this.cropBoxPos.x = Math.max(0, Math.min(newX, this.image.width - this.cropBoxPos.width));
+                this.cropBoxPos.y = Math.max(0, Math.min(newY, this.image.height - this.cropBoxPos.height));
+            } else {
+                this.cropBoxPos.x = newX;
+                this.cropBoxPos.y = newY;
+            }
+            
+            this.render();
+        } else if (this.isDraggingCanvas) {
+            // Update canvas pan offset
+            this.panOffset.x = e.clientX - this.dragStartCanvasOffset.x;
+            this.panOffset.y = e.clientY - this.dragStartCanvasOffset.y;
+            this.render();
+        }
     }
 
-    private handleCanvasMouseUp(): void {
-        this.isDragging = false;
+    private handleMouseUp(): void {
+        this.isDraggingCropBox = false;
+        this.isDraggingCanvas = false;
     }
 
     private handleCanvasWheel(e: WheelEvent): void {
