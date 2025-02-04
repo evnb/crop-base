@@ -167,19 +167,19 @@ body {
 }
 
 .top-edge::after, .bottom-edge::after {
-    width: 34px;  /* 30px + 2px border on each side */
-    height: 14px;  /* 10px + 2px border on each side */
+    width: 30px;  /* Back to original size */
+    height: 10px;  /* Back to original size */
     left: 50%;
     transform: translateX(-50%);
-    top: -2px;  /* Offset by border width to center */
+    top: -2px;  /* Keep the border offset fix */
 }
 
 .left-edge::after, .right-edge::after {
-    width: 14px;  /* 10px + 2px border on each side */
-    height: 34px;  /* 30px + 2px border on each side */
+    width: 10px;  /* Back to original size */
+    height: 30px;  /* Back to original size */
     top: 50%;
     transform: translateY(-50%);
-    left: -2px;  /* Offset by border width to center */
+    left: -2px;  /* Keep the border offset fix */
 }
 
 .top-edge { top: -5px; }
