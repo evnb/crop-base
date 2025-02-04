@@ -137,30 +137,52 @@ body {
 .bottom-left { bottom: -5px; left: -5px; cursor: sw-resize; }
 .bottom-right { bottom: -5px; right: -5px; cursor: se-resize; }
 
-/* Edge handles */
+/* Edge handles with extended hit areas */
 .edge-handle {
     position: absolute;
     background-color: #fff;
     border: 2px solid #007bff;
 }
 
+/* Visible handle parts */
 .top-edge, .bottom-edge {
-    height: 10px;  /* Match circle diameter */
+    height: 10px;
     width: 30px;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .left-edge, .right-edge {
-    width: 10px;  /* Match circle diameter */
+    width: 10px;
     height: 30px;
     top: 50%;
     transform: translateY(-50%);
 }
 
-.top-edge { top: -5px; cursor: ns-resize; }     /* Center the 10px height */
+/* Extended hit areas */
+.top-edge::before, .bottom-edge::before {
+    content: '';
+    position: absolute;
+    width: 100vw;  /* Full width */
+    height: 10px;  /* Match handle thickness */
+    left: -50vw;   /* Center the extended area */
+    top: 0;
+    cursor: ns-resize;
+}
+
+.left-edge::before, .right-edge::before {
+    content: '';
+    position: absolute;
+    height: 100vh;  /* Full height */
+    width: 10px;   /* Match handle thickness */
+    top: -50vh;    /* Center the extended area */
+    left: 0;
+    cursor: ew-resize;
+}
+
+.top-edge { top: -5px; cursor: ns-resize; }
 .bottom-edge { bottom: -5px; cursor: ns-resize; }
-.left-edge { left: -5px; cursor: ew-resize; }   /* Center the 10px width */
+.left-edge { left: -5px; cursor: ew-resize; }
 .right-edge { right: -5px; cursor: ew-resize; }
 
 /* Controls Container */
