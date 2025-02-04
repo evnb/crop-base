@@ -19,6 +19,7 @@ Each document in this folder focuses on a specific aspect of development:
 
 ## Current Documents
 1. [Event Handling Lessons](./event-handling-lessons.md) - Insights about implementing drag operations for panning and crop box movement
+2. [Touch Events and Testing](./touch-events-testing.md) - Analysis of touch event behavior and testing implications
 
 ## Contributing
 When adding new takeaways:
