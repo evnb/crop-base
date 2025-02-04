@@ -135,7 +135,7 @@ class PixelPerfectEditor {
         // Crop box events
         this.cropBox.addEventListener('pointerdown', this.handleCropBoxMouseDown.bind(this));
         this.cropBox.addEventListener('click', (e) => e.stopPropagation());
-        this.cropBox.addEventListener('wheel', (e) => e.stopPropagation());
+        this.cropBox.addEventListener('wheel', (e) => this.handleCanvasWheel(e));
     }
 
     private async handleImageUpload(event: Event): Promise<void> {
