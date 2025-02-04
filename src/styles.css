@@ -137,53 +137,54 @@ body {
 .bottom-left { bottom: -5px; left: -5px; cursor: sw-resize; }
 .bottom-right { bottom: -5px; right: -5px; cursor: se-resize; }
 
-/* Edge handles with extended hit areas */
+/* Edge handles */
 .edge-handle {
+    position: absolute;
+    cursor: ns-resize;
+}
+
+/* Make the base handles span the full width/height */
+.top-edge, .bottom-edge {
+    width: calc(100% - 20px);  /* Full width minus space for corner handles */
+    height: 10px;
+    left: 10px;  /* Space for corner handle */
+}
+
+.left-edge, .right-edge {
+    height: calc(100% - 20px);  /* Full height minus space for corner handles */
+    width: 10px;
+    top: 10px;  /* Space for corner handle */
+    cursor: ew-resize;
+}
+
+/* Visible handle parts */
+.edge-handle::after {
+    content: '';
     position: absolute;
     background-color: #fff;
     border: 2px solid #007bff;
 }
 
-/* Visible handle parts */
-.top-edge, .bottom-edge {
-    height: 10px;
+.top-edge::after, .bottom-edge::after {
     width: 30px;
+    height: 10px;
     left: 50%;
     transform: translateX(-50%);
+    top: 0;
 }
 
-.left-edge, .right-edge {
+.left-edge::after, .right-edge::after {
     width: 10px;
     height: 30px;
     top: 50%;
     transform: translateY(-50%);
-}
-
-/* Extended hit areas */
-.top-edge::before, .bottom-edge::before {
-    content: '';
-    position: absolute;
-    width: 100vw;  /* Full width */
-    height: 10px;  /* Match handle thickness */
-    left: -50vw;   /* Center the extended area */
-    top: 0;
-    cursor: ns-resize;
-}
-
-.left-edge::before, .right-edge::before {
-    content: '';
-    position: absolute;
-    height: 100vh;  /* Full height */
-    width: 10px;   /* Match handle thickness */
-    top: -50vh;    /* Center the extended area */
     left: 0;
-    cursor: ew-resize;
 }
 
-.top-edge { top: -5px; cursor: ns-resize; }
-.bottom-edge { bottom: -5px; cursor: ns-resize; }
-.left-edge { left: -5px; cursor: ew-resize; }
-.right-edge { right: -5px; cursor: ew-resize; }
+.top-edge { top: -5px; }
+.bottom-edge { bottom: -5px; }
+.left-edge { left: -5px; }
+.right-edge { right: -5px; }
 
 /* Controls Container */
 .controls-container {
