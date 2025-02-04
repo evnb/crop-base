@@ -3,15 +3,16 @@
 ## Goals
 1. [ ] Allow crop box to extend beyond visible area
 2. [ ] Maintain absolute pixel coordinates during zoom
-3. [ ] Separate view panning from crop box movement
+3. [x] Separate view panning from crop box movement
 4. [ ] Implement pixel-perfect preview rendering using nearest neighbor scaling
 
 ## TODO
 ### Desktop Implementation (Priority)
 1. [ ] Fix Core Functionality
-   - [ ] Fix panning issues in tests and actual usage
+   - [x] Fix panning in actual usage
+   - [ ] Fix panning in automated tests
    - [ ] Ensure zoom maintains pixel-perfect coordinates
-   - [ ] Implement proper crop box movement independent of view
+   - [x] Implement proper crop box movement independent of view
    - [ ] Add proper boundary handling for crop box
 
 2. [ ] Crop Implementation
@@ -81,11 +82,12 @@
 ### Current State
 - TypeScript conversion complete
 - Test infrastructure in place
-- Most tests passing, with some issues in panning functionality
+- Panning and crop box movement working in manual testing
+- Some automated tests still failing for panning and crop box movement
 - Development server working correctly
 
 ### Immediate Next Steps
-1. Fix panning functionality and related tests
+1. Fix automated tests for panning and crop box movement
 2. Complete remaining test coverage
 3. Implement remaining pixel-perfect features
 4. Document testing procedures and setup
