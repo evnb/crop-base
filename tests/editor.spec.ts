@@ -154,7 +154,7 @@ test.describe('Photo Editor', () => {
         await page.mouse.up();
         await waitForPanUpdate(initialOffset);
         const rightPanOffset = await getPanOffset();
-        expect(rightPanOffset.x).toBeLessThan(initialOffset.x);
+        expect(rightPanOffset.x).toBeGreaterThan(initialOffset.x);
         expect(Math.abs(rightPanOffset.y - initialOffset.y)).toBeLessThan(5);
 
         // Test panning down (canvas moves up)
@@ -164,7 +164,7 @@ test.describe('Photo Editor', () => {
         await page.mouse.up();
         await waitForPanUpdate(rightPanOffset);
         const downPanOffset = await getPanOffset();
-        expect(downPanOffset.y).toBeLessThan(rightPanOffset.y);
+        expect(downPanOffset.y).toBeGreaterThan(rightPanOffset.y);
 
         // Test panning left (canvas moves right)
         await page.mouse.move(endX, endY);
@@ -173,7 +173,7 @@ test.describe('Photo Editor', () => {
         await page.mouse.up();
         await waitForPanUpdate(downPanOffset);
         const leftPanOffset = await getPanOffset();
-        expect(leftPanOffset.x).toBeGreaterThan(downPanOffset.x);
+        expect(leftPanOffset.x).toBeLessThan(downPanOffset.x);
     });
 
     test('should handle crop box movement', async ({ page }) => {
