@@ -8,6 +8,19 @@ interface CropBox extends Point {
     height: number;
 }
 
+enum DragMode {
+    None,
+    Move,
+    ResizeN,
+    ResizeS,
+    ResizeE,
+    ResizeW,
+    ResizeNW,
+    ResizeNE,
+    ResizeSW,
+    ResizeSE
+}
+
 /**
  * PixelPerfectEditor - A class that handles pixel-perfect image editing operations
  * Features:
@@ -40,6 +53,8 @@ class PixelPerfectEditor {
     private isDraggingCanvas: boolean = false;
     private dragStartCropBox: Point = { x: 0, y: 0 };
     private dragStartCanvasOffset: Point = { x: 0, y: 0 };
+    private currentDragMode: DragMode = DragMode.None;
+    private readonly RESIZE_HANDLE_SIZE = 10; // Size of the edge/corner hit area in pixels
 
     constructor() {
         // DOM Elements
@@ -243,19 +258,68 @@ class PixelPerfectEditor {
         this.cropBox.style.top = `${this.cropBoxPos.y * scale + this.panOffset.y}px`;
         this.cropBox.style.width = `${this.cropBoxPos.width * scale}px`;
         this.cropBox.style.height = `${this.cropBoxPos.height * scale}px`;
+        
+        // Add visual indicators for resize handles
+        this.cropBox.style.cursor = 'move';
+        
+        // Update cursor based on hover position
+        if (this.isDraggingCropBox) {
+            switch (this.currentDragMode) {
+                case DragMode.ResizeN:
+                case DragMode.ResizeS:
+                    this.cropBox.style.cursor = 'ns-resize';
+                    break;
+                case DragMode.ResizeE:
+                case DragMode.ResizeW:
+                    this.cropBox.style.cursor = 'ew-resize';
+                    break;
+                case DragMode.ResizeNW:
+                case DragMode.ResizeSE:
+                    this.cropBox.style.cursor = 'nwse-resize';
+                    break;
+                case DragMode.ResizeNE:
+                case DragMode.ResizeSW:
+                    this.cropBox.style.cursor = 'nesw-resize';
+                    break;
+                case DragMode.Move:
+                    this.cropBox.style.cursor = 'move';
+                    break;
+            }
+        }
+    }
+
+    private getDragMode(e: PointerEvent): DragMode {
+        const rect = this.cropBox.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const handleSize = this.RESIZE_HANDLE_SIZE;
+        
+        // Check corners first (they take precedence over edges)
+        if (x <= handleSize && y <= handleSize) return DragMode.ResizeNW;
+        if (x >= rect.width - handleSize && y <= handleSize) return DragMode.ResizeNE;
+        if (x <= handleSize && y >= rect.height - handleSize) return DragMode.ResizeSW;
+        if (x >= rect.width - handleSize && y >= rect.height - handleSize) return DragMode.ResizeSE;
+        
+        // Then check edges
+        if (y <= handleSize) return DragMode.ResizeN;
+        if (y >= rect.height - handleSize) return DragMode.ResizeS;
+        if (x <= handleSize) return DragMode.ResizeW;
+        if (x >= rect.width - handleSize) return DragMode.ResizeE;
+        
+        // If not on any edge/corner, it's a move
+        return DragMode.Move;
     }
 
     private handleCropBoxMouseDown(e: PointerEvent): void {
-        e.stopPropagation(); // Prevent canvas drag from starting
-        e.preventDefault(); // Prevent any default behavior
+        e.stopPropagation();
+        e.preventDefault();
         
-        // Set pointer capture to ensure we get all pointer events
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
         
         this.isDraggingCropBox = true;
         this.isDraggingCanvas = false;
+        this.currentDragMode = this.getDragMode(e);
         
-        // Store initial positions for relative movement
         this.dragStartCropBox = {
             x: e.clientX,
             y: e.clientY
@@ -284,32 +348,81 @@ class PixelPerfectEditor {
         if (!this.isDraggingCropBox && !this.isDraggingCanvas) return;
 
         if (this.isDraggingCropBox) {
-            // Calculate relative movement
             const deltaX = e.clientX - this.dragStartCropBox.x;
             const deltaY = e.clientY - this.dragStartCropBox.y;
+            const scaledDeltaX = deltaX / this.zoomLevel;
+            const scaledDeltaY = deltaY / this.zoomLevel;
             
-            // Update crop box position in image coordinates
-            const newX = this.cropBoxPos.x + deltaX / this.zoomLevel;
-            const newY = this.cropBoxPos.y + deltaY / this.zoomLevel;
+            // Store old values for min-size enforcement
+            const oldX = this.cropBoxPos.x;
+            const oldY = this.cropBoxPos.y;
+            const oldWidth = this.cropBoxPos.width;
+            const oldHeight = this.cropBoxPos.height;
             
-            // Update drag start for next move
+            switch (this.currentDragMode) {
+                case DragMode.Move:
+                    this.cropBoxPos.x += scaledDeltaX;
+                    this.cropBoxPos.y += scaledDeltaY;
+                    break;
+                    
+                case DragMode.ResizeN:
+                    this.cropBoxPos.y += scaledDeltaY;
+                    this.cropBoxPos.height -= scaledDeltaY;
+                    break;
+                    
+                case DragMode.ResizeS:
+                    this.cropBoxPos.height += scaledDeltaY;
+                    break;
+                    
+                case DragMode.ResizeE:
+                    this.cropBoxPos.width += scaledDeltaX;
+                    break;
+                    
+                case DragMode.ResizeW:
+                    this.cropBoxPos.x += scaledDeltaX;
+                    this.cropBoxPos.width -= scaledDeltaX;
+                    break;
+                    
+                case DragMode.ResizeNW:
+                    this.cropBoxPos.x += scaledDeltaX;
+                    this.cropBoxPos.y += scaledDeltaY;
+                    this.cropBoxPos.width -= scaledDeltaX;
+                    this.cropBoxPos.height -= scaledDeltaY;
+                    break;
+                    
+                case DragMode.ResizeNE:
+                    this.cropBoxPos.y += scaledDeltaY;
+                    this.cropBoxPos.width += scaledDeltaX;
+                    this.cropBoxPos.height -= scaledDeltaY;
+                    break;
+                    
+                case DragMode.ResizeSW:
+                    this.cropBoxPos.x += scaledDeltaX;
+                    this.cropBoxPos.width -= scaledDeltaX;
+                    this.cropBoxPos.height += scaledDeltaY;
+                    break;
+                    
+                case DragMode.ResizeSE:
+                    this.cropBoxPos.width += scaledDeltaX;
+                    this.cropBoxPos.height += scaledDeltaY;
+                    break;
+            }
+            
+            // Enforce minimum size
+            const MIN_SIZE = 10;
+            if (this.cropBoxPos.width < MIN_SIZE || this.cropBoxPos.height < MIN_SIZE) {
+                this.cropBoxPos.x = oldX;
+                this.cropBoxPos.y = oldY;
+                this.cropBoxPos.width = oldWidth;
+                this.cropBoxPos.height = oldHeight;
+            }
+            
             this.dragStartCropBox = {
                 x: e.clientX,
                 y: e.clientY
             };
             
-            // Apply bounds checking
-            if (this.image) {
-                this.cropBoxPos.x = Math.max(0, Math.min(newX, this.image.width - this.cropBoxPos.width));
-                this.cropBoxPos.y = Math.max(0, Math.min(newY, this.image.height - this.cropBoxPos.height));
-            } else {
-                this.cropBoxPos.x = newX;
-                this.cropBoxPos.y = newY;
-            }
-            
-            // Update display
-            this.updateCropBoxDisplay();
-            requestAnimationFrame(() => this.render());
+            this.render();
         } else if (this.isDraggingCanvas) {
             // Calculate relative movement
             const deltaX = e.clientX - this.dragStartCanvasOffset.x;
