@@ -81,17 +81,17 @@ test.describe('Photo Editor', () => {
 
         const initialOffset = await getPanOffset();
 
-        // Perform pan operation
+        // Perform pan operation (drag right, canvas moves left)
         const canvas = page.locator('#imageCanvas');
         await canvas.hover();
         await page.mouse.down();
         await page.mouse.move(100, 100, { steps: 5 });
         await page.mouse.up();
         
-        // Verify pan offset has changed
+        // Verify pan offset has changed (negative for right movement)
         const newOffset = await getPanOffset();
-        expect(newOffset.x).toBeGreaterThan(initialOffset.x);
-        expect(newOffset.y).toBeGreaterThan(initialOffset.y);
+        expect(newOffset.x).toBeLessThan(initialOffset.x);
+        expect(newOffset.y).toBeLessThan(initialOffset.y);
     });
 
     test('should handle panning in multiple directions', async ({ page }) => {
@@ -108,28 +108,28 @@ test.describe('Photo Editor', () => {
         const canvas = page.locator('#imageCanvas');
         await canvas.hover();
 
-        // Test panning right
+        // Test panning right (canvas moves left)
         const initialOffset = await getPanOffset();
         await page.mouse.down();
         await page.mouse.move(100, 0, { steps: 5 });
         await page.mouse.up();
         const rightPanOffset = await getPanOffset();
-        expect(rightPanOffset.x).toBeGreaterThan(initialOffset.x);
+        expect(rightPanOffset.x).toBeLessThan(initialOffset.x);
         expect(rightPanOffset.y).toBe(initialOffset.y);
 
-        // Test panning down
+        // Test panning down (canvas moves up)
         await page.mouse.down();
         await page.mouse.move(100, 100, { steps: 5 });
         await page.mouse.up();
         const downPanOffset = await getPanOffset();
-        expect(downPanOffset.y).toBeGreaterThan(rightPanOffset.y);
+        expect(downPanOffset.y).toBeLessThan(rightPanOffset.y);
 
-        // Test panning left
+        // Test panning left (canvas moves right)
         await page.mouse.down();
         await page.mouse.move(0, 100, { steps: 5 });
         await page.mouse.up();
         const leftPanOffset = await getPanOffset();
-        expect(leftPanOffset.x).toBeLessThan(downPanOffset.x);
+        expect(leftPanOffset.x).toBeGreaterThan(downPanOffset.x);
     });
 
     test('should handle crop box movement', async ({ page }) => {
@@ -137,16 +137,19 @@ test.describe('Photo Editor', () => {
         const imagePath = path.join(__dirname, '../testimages/lewis-fungi-31a2.jpg');
         await page.locator('#imageInput').setInputFiles(imagePath);
 
-        // Helper function to get crop box position
-        const getCropBoxPosition = async () => page.evaluate(() => {
+        // Helper function to get crop box position and pan offset
+        const getPositions = async () => page.evaluate(() => {
             const editor = (window as any).editor;
-            return editor.cropBoxPos;
+            return {
+                cropBox: editor.cropBoxPos,
+                panOffset: editor.panOffset
+            };
         });
 
         // Get initial position
         const cropBox = page.locator('#cropBox');
         await expect(cropBox).toBeVisible();
-        const initialPos = await getCropBoxPosition();
+        const initialPos = await getPositions();
 
         // Move crop box
         await cropBox.hover();
@@ -155,17 +158,22 @@ test.describe('Photo Editor', () => {
         await page.mouse.up();
 
         // Verify new position
-        const newPos = await getCropBoxPosition();
-        expect(newPos.x).toBeGreaterThan(initialPos.x);
-        expect(newPos.y).toBeGreaterThan(initialPos.y);
+        const newPos = await getPositions();
+        
+        // Calculate expected position change accounting for pan offset
+        const expectedX = initialPos.cropBox.x + (50 - (newPos.panOffset.x - initialPos.panOffset.x)) / 1;  // 1 is zoom level
+        const expectedY = initialPos.cropBox.y + (50 - (newPos.panOffset.y - initialPos.panOffset.y)) / 1;
+        
+        expect(newPos.cropBox.x).toBeCloseTo(expectedX, 1);
+        expect(newPos.cropBox.y).toBeCloseTo(expectedY, 1);
 
         // Verify crop box coordinates are updated in display
         const coordinates = await page.evaluate(() => ({
             x: parseInt(document.getElementById('cropX')?.textContent || '0'),
             y: parseInt(document.getElementById('cropY')?.textContent || '0')
         }));
-        expect(coordinates.x).toBeGreaterThan(initialPos.x);
-        expect(coordinates.y).toBeGreaterThan(initialPos.y);
+        expect(coordinates.x).toBeCloseTo(newPos.cropBox.x, 0);
+        expect(coordinates.y).toBeCloseTo(newPos.cropBox.y, 0);
     });
 
     test('should handle crop box movement with zoom', async ({ page }) => {
@@ -177,11 +185,18 @@ test.describe('Photo Editor', () => {
         await page.click('#zoomIn');
         await expect(page.locator('#zoomLevel')).toHaveText('125%');
 
-        // Get initial position
-        const initialCoords = await page.evaluate(() => {
+        // Helper function to get positions
+        const getPositions = async () => page.evaluate(() => {
             const editor = (window as any).editor;
-            return editor.cropBoxPos;
+            return {
+                cropBox: editor.cropBoxPos,
+                panOffset: editor.panOffset,
+                zoomLevel: editor.zoomLevel
+            };
         });
+
+        // Get initial position
+        const initialPos = await getPositions();
 
         // Move crop box
         const cropBox = page.locator('#cropBox');
@@ -190,19 +205,23 @@ test.describe('Photo Editor', () => {
         await page.mouse.move(100, 100, { steps: 5 });
         await page.mouse.up();
 
-        // Verify new coordinates accounting for zoom
-        const newCoords = await page.evaluate(() => {
-            const editor = (window as any).editor;
-            return editor.cropBoxPos;
-        });
-
-        // The actual coordinate change should be scaled by zoom level
-        expect(newCoords.x).toBeGreaterThan(initialCoords.x);
-        expect(newCoords.y).toBeGreaterThan(initialCoords.y);
+        // Verify new position
+        const newPos = await getPositions();
         
-        // Coordinates should still be whole numbers
-        expect(Number.isInteger(newCoords.x)).toBeTruthy();
-        expect(Number.isInteger(newCoords.y)).toBeTruthy();
+        // Calculate expected position change accounting for zoom and pan
+        const expectedX = initialPos.cropBox.x + (100 - (newPos.panOffset.x - initialPos.panOffset.x)) / newPos.zoomLevel;
+        const expectedY = initialPos.cropBox.y + (100 - (newPos.panOffset.y - initialPos.panOffset.y)) / newPos.zoomLevel;
+        
+        expect(newPos.cropBox.x).toBeCloseTo(expectedX, 1);
+        expect(newPos.cropBox.y).toBeCloseTo(expectedY, 1);
+        
+        // Coordinates should still be whole numbers in display
+        const coordinates = await page.evaluate(() => ({
+            x: parseInt(document.getElementById('cropX')?.textContent || '0'),
+            y: parseInt(document.getElementById('cropY')?.textContent || '0')
+        }));
+        expect(Number.isInteger(coordinates.x)).toBeTruthy();
+        expect(Number.isInteger(coordinates.y)).toBeTruthy();
     });
 
     test('should maintain pixel-perfect coordinates', async ({ page }) => {
