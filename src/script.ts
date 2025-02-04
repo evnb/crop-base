@@ -118,24 +118,22 @@ class PixelPerfectEditor {
     }
 
     private initializeEventListeners(): void {
-        // Upload handling
+        // Upload and zoom controls (keep these as click events)
         this.uploadButton.addEventListener('click', () => this.imageInput.click());
         this.imageInput.addEventListener('change', (e) => this.handleImageUpload(e));
-
-        // Zoom controls
+        
         this.zoomInBtn.addEventListener('click', () => this.zoom(1.25));
         this.zoomOutBtn.addEventListener('click', () => this.zoom(0.8));
-
-        // Canvas interaction events
-        this.imageCanvas.addEventListener('mousedown', this.handleCanvasMouseDown.bind(this));
-        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
-        this.imageCanvas.addEventListener('wheel', (e) => this.handleCanvasWheel(e));
-
-        // Crop box interaction events
-        this.cropBox.addEventListener('mousedown', this.handleCropBoxMouseDown.bind(this));
         
-        // Prevent crop box events from bubbling to canvas
+        // Convert mouse events to pointer events
+        this.imageCanvas.addEventListener('pointerdown', this.handleCanvasMouseDown.bind(this));
+        document.addEventListener('pointermove', this.handleMouseMove.bind(this));
+        document.addEventListener('pointerup', this.handleMouseUp.bind(this));
+        document.addEventListener('pointercancel', this.handleMouseUp.bind(this));
+        this.imageCanvas.addEventListener('wheel', (e) => this.handleCanvasWheel(e));
+        
+        // Crop box events
+        this.cropBox.addEventListener('pointerdown', this.handleCropBoxMouseDown.bind(this));
         this.cropBox.addEventListener('click', (e) => e.stopPropagation());
         this.cropBox.addEventListener('wheel', (e) => e.stopPropagation());
     }
@@ -247,9 +245,13 @@ class PixelPerfectEditor {
         this.cropBox.style.height = `${this.cropBoxPos.height * scale}px`;
     }
 
-    private handleCropBoxMouseDown(e: MouseEvent): void {
+    private handleCropBoxMouseDown(e: PointerEvent): void {
         e.stopPropagation(); // Prevent canvas drag from starting
         e.preventDefault(); // Prevent any default behavior
+        
+        // Set pointer capture to ensure we get all pointer events
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        
         this.isDraggingCropBox = true;
         this.isDraggingCanvas = false;
         
@@ -261,9 +263,13 @@ class PixelPerfectEditor {
         this.dragStartCanvasOffset = { ...this.panOffset };
     }
 
-    private handleCanvasMouseDown(e: MouseEvent): void {
+    private handleCanvasMouseDown(e: PointerEvent): void {
         if (this.isDraggingCropBox) return;
         e.preventDefault(); // Prevent any default behavior
+        
+        // Set pointer capture to ensure we get all pointer events
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        
         this.isDraggingCanvas = true;
         this.isDraggingCropBox = false;
         
@@ -274,7 +280,7 @@ class PixelPerfectEditor {
         };
     }
 
-    private handleMouseMove(e: MouseEvent): void {
+    private handleMouseMove(e: PointerEvent): void {
         if (!this.isDraggingCropBox && !this.isDraggingCanvas) return;
 
         if (this.isDraggingCropBox) {
@@ -324,13 +330,21 @@ class PixelPerfectEditor {
         }
     }
 
-    private handleMouseUp(e: MouseEvent): void {
-        if (this.isDraggingCropBox || this.isDraggingCanvas) {
-            e.preventDefault(); // Prevent any default behavior
-            this.isDraggingCropBox = false;
-            this.isDraggingCanvas = false;
-            this.render(); // Ensure final render
+    private handleMouseUp(e: PointerEvent): void {
+        if (!this.isDraggingCropBox && !this.isDraggingCanvas) return;
+        
+        // Release pointer capture
+        if (this.isDraggingCropBox) {
+            this.cropBox.releasePointerCapture(e.pointerId);
+        } else if (this.isDraggingCanvas) {
+            this.imageCanvas.releasePointerCapture(e.pointerId);
         }
+        
+        this.isDraggingCropBox = false;
+        this.isDraggingCanvas = false;
+        
+        // Ensure final render
+        requestAnimationFrame(() => this.render());
     }
 
     private handleCanvasWheel(e: WheelEvent): void {
