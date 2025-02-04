@@ -163,22 +163,23 @@ body {
     position: absolute;
     background-color: #fff;
     border: 2px solid #007bff;
+    box-sizing: border-box;  /* Make borders part of the element size */
 }
 
 .top-edge::after, .bottom-edge::after {
-    width: 30px;
-    height: 10px;
+    width: 34px;  /* 30px + 2px border on each side */
+    height: 14px;  /* 10px + 2px border on each side */
     left: 50%;
     transform: translateX(-50%);
-    top: 0;
+    top: -2px;  /* Offset by border width to center */
 }
 
 .left-edge::after, .right-edge::after {
-    width: 10px;
-    height: 30px;
+    width: 14px;  /* 10px + 2px border on each side */
+    height: 34px;  /* 30px + 2px border on each side */
     top: 50%;
     transform: translateY(-50%);
-    left: 0;
+    left: -2px;  /* Offset by border width to center */
 }
 
 .top-edge { top: -5px; }
