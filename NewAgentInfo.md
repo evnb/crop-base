@@ -1,5 +1,8 @@
 # Information for New Agent
 
+## Getting Started
+See [Quickstart.md](Quickstart.md) for instructions on setting up and running the development environment.
+
 ## Project Overview
 - Building a pixel-perfect photo editor web app
 - Main repo is private/local
