@@ -21,6 +21,13 @@ enum DragMode {
     ResizeSE
 }
 
+interface EditorState {
+    cropBox: CropBox;
+    zoom: number;
+    pan: Point;
+    originalImageUrl: string;
+}
+
 /**
  * PixelPerfectEditor - A class that handles pixel-perfect image editing operations
  * Features:
@@ -57,6 +64,15 @@ class PixelPerfectEditor {
     private dragStartCanvasOffset: Point = { x: 0, y: 0 };
     private currentDragMode: DragMode = DragMode.None;
     private readonly RESIZE_HANDLE_SIZE = 10; // Size of the edge/corner hit area in pixels
+
+    private originalState: EditorState | null = null;
+    private isPreviewMode = false;
+    private continueEditingBtn: HTMLButtonElement;
+    private downloadBtn: HTMLButtonElement;
+    private applyCropBtn: HTMLButtonElement;
+
+    private imageWidth: number = 0;
+    private imageHeight: number = 0;
 
     constructor() {
         // DOM Elements
@@ -142,6 +158,20 @@ class PixelPerfectEditor {
         
         // Expose editor instance globally for testing
         (window as any).editor = this;
+
+        // Add new buttons (initially hidden)
+        this.continueEditingBtn = document.getElementById('continueEditing') as HTMLButtonElement;
+        this.downloadBtn = document.getElementById('download') as HTMLButtonElement;
+        this.applyCropBtn = document.getElementById('applyCrop') as HTMLButtonElement;
+
+        if (!this.continueEditingBtn || !this.downloadBtn || !this.applyCropBtn) {
+            throw new Error('Required buttons not found');
+        }
+
+        // Add event listeners for new buttons
+        this.continueEditingBtn.addEventListener('click', () => this.exitPreviewMode());
+        this.downloadBtn.addEventListener('click', () => this.downloadCroppedImage());
+        this.applyCropBtn.addEventListener('click', () => this.enterPreviewMode());
     }
 
     private initializeEventListeners(): void {
@@ -186,6 +216,7 @@ class PixelPerfectEditor {
             this.initializeCanvas();
             this.render();
             this.cropBox.style.display = 'block';
+            this.handleImageLoad();
         } catch (error) {
             console.error('Error loading image:', error);
         }
@@ -624,6 +655,159 @@ class PixelPerfectEditor {
 
         this.updateZoomDisplay();
         this.render();
+    }
+
+    private saveCurrentState(): void {
+        this.originalState = {
+            cropBox: { ...this.cropBoxPos },
+            zoom: this.zoomLevel,
+            pan: { ...this.panOffset },
+            originalImageUrl: this.image?.src || ''
+        };
+    }
+
+    private enterPreviewMode(): void {
+        if (!this.image) return;
+
+        this.saveCurrentState();
+        this.isPreviewMode = true;
+
+        // Create a new canvas for the cropped image
+        const cropCanvas = document.createElement('canvas');
+        const ctx = cropCanvas.getContext('2d')!;
+
+        // Set canvas size to crop box size
+        cropCanvas.width = this.cropBoxPos.width;
+        cropCanvas.height = this.cropBoxPos.height;
+
+        // Enable transparency
+        ctx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+
+        // Draw the cropped portion of the image
+        ctx.drawImage(
+            this.image,
+            this.cropBoxPos.x, this.cropBoxPos.y,
+            this.cropBoxPos.width, this.cropBoxPos.height,
+            0, 0,
+            this.cropBoxPos.width, this.cropBoxPos.height
+        );
+
+        // Replace current image with cropped version
+        const croppedImageUrl = cropCanvas.toDataURL('image/png');
+        this.image.src = croppedImageUrl;
+
+        // Update UI for preview mode
+        this.updateUIForPreviewMode(true);
+
+        // Reset zoom and pan for the preview
+        this.zoomToFit();
+    }
+
+    private exitPreviewMode(): void {
+        if (!this.image || !this.originalState) return;
+
+        this.isPreviewMode = false;
+
+        // Restore original image
+        this.image.src = this.originalState.originalImageUrl;
+
+        // Wait for image to load before restoring state
+        this.image.onload = () => {
+            if (!this.originalState) return;
+
+            // Restore original state
+            this.cropBoxPos = { ...this.originalState.cropBox };
+            this.zoomLevel = this.originalState.zoom;
+            this.panOffset = { ...this.originalState.pan };
+
+            // Update UI
+            this.updateUIForPreviewMode(false);
+            this.updateCropBoxDisplay();
+            this.updateImageTransform();
+        };
+    }
+
+    private updateUIForPreviewMode(isPreview: boolean): void {
+        // Toggle visibility of buttons
+        this.continueEditingBtn.style.display = isPreview ? 'block' : 'none';
+        this.downloadBtn.style.display = isPreview ? 'block' : 'none';
+        this.applyCropBtn.style.display = isPreview ? 'none' : 'block';
+        this.zoomToCropBtn.style.display = isPreview ? 'none' : 'block';
+
+        // Enable/disable Apply Crop button based on preview mode
+        this.applyCropBtn.disabled = isPreview;
+
+        // Toggle input fields
+        const inputs = document.querySelectorAll('.coordinate-display input, .size-display input') as NodeListOf<HTMLInputElement>;
+        inputs.forEach(input => input.disabled = isPreview);
+
+        // Toggle crop box visibility
+        if (this.cropBox) {
+            this.cropBox.style.display = isPreview ? 'none' : 'block';
+        }
+    }
+
+    private downloadCroppedImage(): void {
+        if (!this.image || !this.isPreviewMode) return;
+
+        // Create download link
+        const link = document.createElement('a');
+        link.download = 'cropped-image.png';
+        link.href = this.image.src;
+        link.click();
+    }
+
+    private updateImageTransform(): void {
+        // Implementation of updateImageTransform method
+    }
+
+    private handleImageLoad(): void {
+        if (!this.image) return;
+
+        // Get the natural dimensions of the loaded image
+        this.imageWidth = this.image.naturalWidth;
+        this.imageHeight = this.image.naturalHeight;
+
+        // Initialize crop box to full image size
+        this.cropBoxPos = {
+            x: 0,
+            y: 0,
+            width: this.imageWidth,
+            height: this.imageHeight
+        };
+
+        // Enable the Apply Crop button since we now have an image
+        this.applyCropBtn.disabled = false;
+
+        // Update UI
+        this.updateCropBoxDisplay();
+        this.zoomToFit();
+    }
+
+    private clearImage(): void {
+        if (this.image) {
+            this.image.src = '';
+            this.cropBoxPos = { x: 0, y: 0, width: 0, height: 0 };
+            this.zoomLevel = 1;
+            this.panOffset = { x: 0, y: 0 };
+            this.applyCropBtn.disabled = true;  // Disable the button when clearing image
+            this.updateCropBoxDisplay();
+            this.updateImageTransform();
+        }
+    }
+
+    private resetImage(): void {
+        if (!this.image) return;
+        
+        this.image.src = '';
+        this.applyCropBtn.disabled = true;  // Disable the button when resetting image
+        
+        // Re-load the image to trigger handleImageLoad
+        setTimeout(() => {
+            if (this.image && this.originalState) {
+                this.image.src = this.originalState.originalImageUrl;
+            }
+        }, 0);
     }
 }
 
