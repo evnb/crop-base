@@ -39,11 +39,11 @@ class PixelPerfectEditor {
     private readonly zoomOutBtn: HTMLButtonElement;
     private readonly zoomToFitBtn: HTMLButtonElement;
     private readonly zoomToCropBtn: HTMLButtonElement;
-    private readonly zoomLevelDisplay: HTMLElement;
-    private readonly cropXDisplay: HTMLElement;
-    private readonly cropYDisplay: HTMLElement;
-    private readonly cropWidthDisplay: HTMLElement;
-    private readonly cropHeightDisplay: HTMLElement;
+    private readonly zoomLevelInput: HTMLInputElement;
+    private readonly cropXInput: HTMLInputElement;
+    private readonly cropYInput: HTMLInputElement;
+    private readonly cropWidthInput: HTMLInputElement;
+    private readonly cropHeightInput: HTMLInputElement;
 
     private image: HTMLImageElement | null = null;
     private zoomLevel: number = 1;
@@ -94,7 +94,7 @@ class PixelPerfectEditor {
         const zoomOutBtn = document.getElementById('zoomOut');
         const zoomToFitBtn = document.getElementById('zoomToFit');
         const zoomToCropBtn = document.getElementById('zoomToCrop');
-        const zoomLevelDisplay = document.getElementById('zoomLevel');
+        const zoomLevelInput = document.getElementById('zoomLevel');
         
         if (!zoomInBtn || !(zoomInBtn instanceof HTMLButtonElement)) {
             throw new Error('Zoom in button not found');
@@ -108,17 +108,17 @@ class PixelPerfectEditor {
         if (!zoomToCropBtn || !(zoomToCropBtn instanceof HTMLButtonElement)) {
             throw new Error('Zoom to crop button not found');
         }
-        if (!zoomLevelDisplay) {
-            throw new Error('Zoom level display not found');
+        if (!zoomLevelInput || !(zoomLevelInput instanceof HTMLInputElement)) {
+            throw new Error('Zoom level input not found');
         }
 
         this.zoomInBtn = zoomInBtn;
         this.zoomOutBtn = zoomOutBtn;
         this.zoomToFitBtn = zoomToFitBtn;
         this.zoomToCropBtn = zoomToCropBtn;
-        this.zoomLevelDisplay = zoomLevelDisplay;
+        this.zoomLevelInput = zoomLevelInput;
         
-        // Position display elements
+        // Position input elements
         const elements = {
             cropX: document.getElementById('cropX'),
             cropY: document.getElementById('cropY'),
@@ -126,17 +126,17 @@ class PixelPerfectEditor {
             cropHeight: document.getElementById('cropHeight')
         };
 
-        // Validate position display elements
+        // Validate position input elements
         Object.entries(elements).forEach(([key, element]) => {
-            if (!element) {
-                throw new Error(`${key} display element not found`);
+            if (!element || !(element instanceof HTMLInputElement)) {
+                throw new Error(`${key} input element not found`);
             }
         });
 
-        this.cropXDisplay = elements.cropX!;
-        this.cropYDisplay = elements.cropY!;
-        this.cropWidthDisplay = elements.cropWidth!;
-        this.cropHeightDisplay = elements.cropHeight!;
+        this.cropXInput = elements.cropX as HTMLInputElement;
+        this.cropYInput = elements.cropY as HTMLInputElement;
+        this.cropWidthInput = elements.cropWidth as HTMLInputElement;
+        this.cropHeightInput = elements.cropHeight as HTMLInputElement;
         
         this.initializeEventListeners();
         
@@ -145,7 +145,7 @@ class PixelPerfectEditor {
     }
 
     private initializeEventListeners(): void {
-        // Upload and zoom controls (keep these as click events)
+        // Upload and zoom controls
         this.uploadButton.addEventListener('click', () => this.imageInput.click());
         this.imageInput.addEventListener('change', (e) => this.handleImageUpload(e));
         
@@ -153,6 +153,13 @@ class PixelPerfectEditor {
         this.zoomOutBtn.addEventListener('click', () => this.zoom(0.8));
         this.zoomToFitBtn.addEventListener('click', () => this.zoomToFit());
         this.zoomToCropBtn.addEventListener('click', () => this.zoomToCrop());
+        
+        // Manual input handlers
+        this.zoomLevelInput.addEventListener('change', () => this.handleZoomInput());
+        this.cropXInput.addEventListener('change', () => this.handleCropInput());
+        this.cropYInput.addEventListener('change', () => this.handleCropInput());
+        this.cropWidthInput.addEventListener('change', () => this.handleCropInput());
+        this.cropHeightInput.addEventListener('change', () => this.handleCropInput());
         
         // Convert mouse events to pointer events
         this.imageCanvas.addEventListener('pointerdown', this.handleCanvasMouseDown.bind(this));
@@ -289,16 +296,37 @@ class PixelPerfectEditor {
         this.render();
     }
 
+    private handleZoomInput(): void {
+        const value = this.zoomLevelInput.value.replace('%', '');
+        const newZoom = parseFloat(value) / 100;
+        
+        if (isNaN(newZoom) || newZoom <= 0) {
+            this.updateZoomDisplay(); // Reset to current value
+            return;
+        }
+
+        const oldZoom = this.zoomLevel;
+        this.zoomLevel = Math.max(0.1, Math.min(10, newZoom));
+        
+        // Adjust pan offset to keep the center point fixed
+        const centerX = this.imageCanvas.width / 2;
+        const centerY = this.imageCanvas.height / 2;
+        this.panOffset.x = centerX - (centerX - this.panOffset.x) * (this.zoomLevel / oldZoom);
+        this.panOffset.y = centerY - (centerY - this.panOffset.y) * (this.zoomLevel / oldZoom);
+        
+        this.render();
+    }
+
     private updateZoomDisplay(): void {
-        this.zoomLevelDisplay.textContent = `${Math.round(this.zoomLevel * 100)}%`;
+        this.zoomLevelInput.value = `${Math.round(this.zoomLevel * 100)}%`;
     }
 
     private updateCropBoxDisplay(): void {
-        // Update position displays
-        this.cropXDisplay.textContent = Math.round(this.cropBoxPos.x).toString();
-        this.cropYDisplay.textContent = Math.round(this.cropBoxPos.y).toString();
-        this.cropWidthDisplay.textContent = Math.round(this.cropBoxPos.width).toString();
-        this.cropHeightDisplay.textContent = Math.round(this.cropBoxPos.height).toString();
+        // Update position displays with current values
+        this.cropXInput.value = Math.round(this.cropBoxPos.x).toString();
+        this.cropYInput.value = Math.round(this.cropBoxPos.y).toString();
+        this.cropWidthInput.value = Math.round(this.cropBoxPos.width).toString();
+        this.cropHeightInput.value = Math.round(this.cropBoxPos.height).toString();
         
         // Update crop box visual position
         const scale = this.zoomLevel;
@@ -334,6 +362,28 @@ class PixelPerfectEditor {
                     break;
             }
         }
+    }
+
+    private handleCropInput(): void {
+        const x = parseInt(this.cropXInput.value);
+        const y = parseInt(this.cropYInput.value);
+        const width = parseInt(this.cropWidthInput.value);
+        const height = parseInt(this.cropHeightInput.value);
+
+        if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
+            this.updateCropBoxDisplay(); // Reset to current values
+            return;
+        }
+
+        // Update crop box with new values
+        this.cropBoxPos = {
+            x: x,
+            y: y,
+            width: Math.max(10, width), // Minimum size of 10px
+            height: Math.max(10, height)
+        };
+
+        this.render();
     }
 
     private getDragMode(e: PointerEvent): DragMode {

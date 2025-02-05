@@ -226,7 +226,32 @@ body {
 .coordinate-display,
 .size-display {
     display: flex;
-    gap: 10px;
-    font-family: monospace;
+    gap: 12px;
+    margin: 4px 0;
+}
+
+.number-input {
+    width: 60px;
+    padding: 2px 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     font-size: 14px;
+    text-align: center;
+    background: #fff;
+}
+
+.number-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.zoom-controls .number-input {
+    margin: 0 4px;
+}
+
+.coordinate-display .number-input,
+.size-display .number-input {
+    width: 50px;
+    margin: 0 4px;
 } 

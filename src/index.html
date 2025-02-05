@@ -40,19 +40,19 @@
             <div class="controls-container">
                 <div class="zoom-controls">
                     <button id="zoomOut" class="control-button">-</button>
-                    <span id="zoomLevel">100%</span>
+                    <input type="text" id="zoomLevel" value="100%" class="number-input" title="Zoom level">
                     <button id="zoomIn" class="control-button">+</button>
                     <button id="zoomToFit" class="control-button">Fit Image</button>
                     <button id="zoomToCrop" class="control-button">Fit Crop</button>
                 </div>
                 <div class="position-info">
                     <div class="coordinate-display">
-                        <span>X: <span id="cropX">0</span>px</span>
-                        <span>Y: <span id="cropY">0</span>px</span>
+                        <span>X: <input type="text" id="cropX" value="0" class="number-input" title="X coordinate">px</span>
+                        <span>Y: <input type="text" id="cropY" value="0" class="number-input" title="Y coordinate">px</span>
                     </div>
                     <div class="size-display">
-                        <span>W: <span id="cropWidth">0</span>px</span>
-                        <span>H: <span id="cropHeight">0</span>px</span>
+                        <span>W: <input type="text" id="cropWidth" value="0" class="number-input" title="Width">px</span>
+                        <span>H: <input type="text" id="cropHeight" value="0" class="number-input" title="Height">px</span>
                     </div>
                 </div>
                 <button id="applyCrop" class="primary-button" disabled>Apply Crop</button>
