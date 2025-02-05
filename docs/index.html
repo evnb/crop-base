@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Perfect Photo Editor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Photo Editor</h1>
+            <div class="upload-container">
+                <input type="file" id="imageInput" accept="image/*" class="hidden">
+                <button id="uploadButton" class="primary-button">Upload Image</button>
+            </div>
+        </header>
+
+        <main class="editor-container">
+            <div class="canvas-container">
+                <!-- Canvas will be inserted here via JavaScript -->
+                <div id="imageContainer" class="image-container">
+                    <canvas id="imageCanvas"></canvas>
+                    <div id="cropBox" class="crop-box">
+                        <!-- Corner handles -->
+                        <div class="crop-box-handle top-left"></div>
+                        <div class="crop-box-handle top-right"></div>
+                        <div class="crop-box-handle bottom-left"></div>
+                        <div class="crop-box-handle bottom-right"></div>
+                        
+                        <!-- Edge handles -->
+                        <div class="edge-handle top-edge"></div>
+                        <div class="edge-handle bottom-edge"></div>
+                        <div class="edge-handle left-edge"></div>
+                        <div class="edge-handle right-edge"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-container">
+                <div class="zoom-controls">
+                    <button id="zoomOut" class="control-button">-</button>
+                    <div class="zoom-input-container">
+                        <input type="number" id="zoomLevel" value="100" min="10" max="1000" class="number-input" title="Zoom level">
+                        <span class="zoom-symbol">%</span>
+                    </div>
+                    <button id="zoomIn" class="control-button">+</button>
+                    <button id="zoomToFit" class="control-button">Fit Image</button>
+                    <button id="zoomToCrop" class="control-button">Fit Crop</button>
+                </div>
+                <div class="position-info">
+                    <div class="coordinate-display">
+                        <span>X: <div class="unit-input-container">
+                            <input type="number" id="cropX" value="0" class="number-input" title="X coordinate">
+                            <span class="unit-symbol">px</span>
+                        </div></span>
+                        <span>Y: <div class="unit-input-container">
+                            <input type="number" id="cropY" value="0" class="number-input" title="Y coordinate">
+                            <span class="unit-symbol">px</span>
+                        </div></span>
+                    </div>
+                    <div class="size-display">
+                        <span>W: <div class="unit-input-container">
+                            <input type="number" id="cropWidth" value="0" min="1" class="number-input" title="Width">
+                            <span class="unit-symbol">px</span>
+                        </div></span>
+                        <span>H: <div class="unit-input-container">
+                            <input type="number" id="cropHeight" value="0" min="1" class="number-input" title="Height">
+                            <span class="unit-symbol">px</span>
+                        </div></span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="applyCrop" class="primary-button" disabled>Apply Crop</button>
+                    <button id="continueEditing" class="secondary-button" style="display: none;">Continue Editing</button>
+                    <button id="download" class="primary-button" style="display: none;">Download</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html> 
