@@ -258,10 +258,8 @@ body {
     box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
 
-.zoom-controls .number-input,
-.coordinate-display .number-input,
-.size-display .number-input {
-    padding-right: 24px; /* Make room for the unit symbol */
+.zoom-input-container .number-input {
+    padding-right: 24px; /* Make room for the % symbol */
 }
 
 .coordinate-display,
@@ -280,5 +278,6 @@ body {
 
 .coordinate-display .number-input,
 .size-display .number-input {
-    width: 65px; /* Increased from 50px to accommodate the px suffix */
+    width: 75px; /* Increased from 65px to better accommodate numbers with px suffix */
+    padding-right: 28px; /* Make room for the px symbol */
 } 
