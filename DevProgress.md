@@ -60,12 +60,16 @@
 - Set up Playwright for end-to-end testing
 - Implemented basic test suite for core functionality
 - Python HTTP server set up for local development
+- Improved crop box handle positioning and visual alignment
+  - Fixed edge handle centering both along and across edges
+  - Standardized handle sizes and border behavior
+  - Improved visual consistency of resize handles
 
 ### Current Challenges
 - Need to establish proper coordinate system for pixel-perfect operations
 - Design system for handling zoom levels while maintaining exact pixel positions
 - Plan UI/UX for intuitive crop box manipulation
-- Fixed
+- Resolved visual alignment issues with crop box handles
 
 ### Attempted Solutions
 - Implemented TypeScript interfaces for Point and CropBox
@@ -73,6 +77,10 @@
 - Set up comprehensive test suite with Playwright
 - Using Python's HTTP server for local development
 - Successfully fixed automated tests by properly handling pointer events and coordinates
+- Resolved handle positioning issues by:
+  - Properly accounting for border-box sizing
+  - Adjusting base positioning offsets for edge handles
+  - Standardizing handle dimensions and spacing
 
 ### Key Insights
 - Previous attempts highlighted need for clean separation between view panning and crop box
@@ -80,6 +88,7 @@
 - TypeScript provides better type safety and development experience
 - End-to-end testing helps catch UI interaction issues early
 - Proper event handling is crucial for consistent behavior across browsers
+- Visual alignment requires careful consideration of CSS box model and border behavior
 
 ### Current State
 - TypeScript conversion complete
