@@ -14,6 +14,18 @@
    - [ ] Ensure zoom maintains pixel-perfect coordinates
    - [x] Implement proper crop box movement independent of view
    - [ ] Add proper boundary handling for crop box
+   - [ ] Improve image loading and positioning
+     - [ ] Center image and fit to frame on initial load
+     - [ ] Center image when zoomed out with whitespace
+     - [ ] Support very low resolution images (pixel art)
+   - [ ] Enhance zoom functionality
+     - [ ] Allow zooming up to 3x3 pixels filling container dimension
+     - [ ] Add "Zoom To Fit Image" button
+     - [ ] Add "Zoom To Fit Crop" button
+   - [ ] Improve coordinate input
+     - [ ] Allow manual input for zoom percentage
+     - [ ] Allow manual input for X, Y coordinates
+     - [ ] Allow manual input for W, H dimensions
 
 2. [ ] Crop Implementation
    - [ ] Implement actual image cropping functionality
