@@ -18,14 +18,14 @@
      - [x] Center image and fit to frame on initial load
      - [ ] Center image when zoomed out with whitespace
      - [ ] Support very low resolution images (pixel art)
-   - [ ] Enhance zoom functionality
+   - [x] Enhance zoom functionality
      - [ ] Allow zooming up to 3x3 pixels filling container dimension
-     - [ ] Add "Zoom To Fit Image" button
-     - [ ] Add "Zoom To Fit Crop" button
-   - [ ] Improve coordinate input
-     - [ ] Allow manual input for zoom percentage
-     - [ ] Allow manual input for X, Y coordinates
-     - [ ] Allow manual input for W, H dimensions
+     - [x] Add "Zoom To Fit Image" button
+     - [x] Add "Zoom To Fit Crop" button
+   - [x] Improve coordinate input
+     - [x] Allow manual input for zoom percentage
+     - [x] Allow manual input for X, Y coordinates
+     - [x] Allow manual input for W, H dimensions
 
 2. [ ] Crop Implementation
    - [ ] Implement actual image cropping functionality
@@ -81,6 +81,8 @@
   - Added support for small/pixel art images with minimum scale
   - Implemented "Zoom to Fit Image" and "Zoom to Fit Crop" features
   - Canvas now matches container size for better viewport usage
+  - Added manual input controls for zoom, coordinates, and dimensions
+  - Improved input field styling with consistent unit display
 
 ### Current Challenges
 - Need to establish proper coordinate system for pixel-perfect operations
