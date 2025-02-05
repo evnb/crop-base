@@ -694,13 +694,29 @@ class PixelPerfectEditor {
 
         // Replace current image with cropped version
         const croppedImageUrl = cropCanvas.toDataURL('image/png');
+        this.image.onload = () => {
+            // Update UI for preview mode first
+            this.updateUIForPreviewMode(true);
+            
+            // Reset zoom and pan for the preview
+            const container = this.imageCanvas.parentElement;
+            if (container && this.image) {
+                const scaleX = container.clientWidth / this.image.width;
+                const scaleY = container.clientHeight / this.image.height;
+                this.zoomLevel = Math.min(scaleX, scaleY);
+                
+                // Center the image
+                this.panOffset = {
+                    x: (container.clientWidth - this.image.width * this.zoomLevel) / 2,
+                    y: (container.clientHeight - this.image.height * this.zoomLevel) / 2
+                };
+            }
+            
+            // Update zoom display and render
+            this.updateZoomDisplay();
+            this.render();
+        };
         this.image.src = croppedImageUrl;
-
-        // Update UI for preview mode
-        this.updateUIForPreviewMode(true);
-
-        // Reset zoom and pan for the preview
-        this.zoomToFit();
     }
 
     private exitPreviewMode(): void {
@@ -709,9 +725,6 @@ class PixelPerfectEditor {
         this.isPreviewMode = false;
 
         // Restore original image
-        this.image.src = this.originalState.originalImageUrl;
-
-        // Wait for image to load before restoring state
         this.image.onload = () => {
             if (!this.originalState) return;
 
@@ -723,8 +736,10 @@ class PixelPerfectEditor {
             // Update UI
             this.updateUIForPreviewMode(false);
             this.updateCropBoxDisplay();
-            this.updateImageTransform();
+            this.updateZoomDisplay();
+            this.render();
         };
+        this.image.src = this.originalState.originalImageUrl;
     }
 
     private updateUIForPreviewMode(isPreview: boolean): void {
@@ -737,7 +752,7 @@ class PixelPerfectEditor {
         // Enable/disable Apply Crop button based on preview mode
         this.applyCropBtn.disabled = isPreview;
 
-        // Toggle input fields
+        // Toggle input fields and zoom controls
         const inputs = document.querySelectorAll('.coordinate-display input, .size-display input') as NodeListOf<HTMLInputElement>;
         inputs.forEach(input => input.disabled = isPreview);
 
