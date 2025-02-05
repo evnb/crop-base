@@ -40,19 +40,22 @@
             <div class="controls-container">
                 <div class="zoom-controls">
                     <button id="zoomOut" class="control-button">-</button>
-                    <input type="text" id="zoomLevel" value="100%" class="number-input" title="Zoom level">
+                    <div class="zoom-input-container">
+                        <input type="number" id="zoomLevel" value="100" min="10" max="1000" class="number-input" title="Zoom level">
+                        <span class="zoom-symbol">%</span>
+                    </div>
                     <button id="zoomIn" class="control-button">+</button>
                     <button id="zoomToFit" class="control-button">Fit Image</button>
                     <button id="zoomToCrop" class="control-button">Fit Crop</button>
                 </div>
                 <div class="position-info">
                     <div class="coordinate-display">
-                        <span>X: <input type="text" id="cropX" value="0" class="number-input" title="X coordinate">px</span>
-                        <span>Y: <input type="text" id="cropY" value="0" class="number-input" title="Y coordinate">px</span>
+                        <span>X: <input type="number" id="cropX" value="0" class="number-input" title="X coordinate">px</span>
+                        <span>Y: <input type="number" id="cropY" value="0" class="number-input" title="Y coordinate">px</span>
                     </div>
                     <div class="size-display">
-                        <span>W: <input type="text" id="cropWidth" value="0" class="number-input" title="Width">px</span>
-                        <span>H: <input type="text" id="cropHeight" value="0" class="number-input" title="Height">px</span>
+                        <span>W: <input type="number" id="cropWidth" value="0" min="1" class="number-input" title="Width">px</span>
+                        <span>H: <input type="number" id="cropHeight" value="0" min="1" class="number-input" title="Height">px</span>
                     </div>
                 </div>
                 <button id="applyCrop" class="primary-button" disabled>Apply Crop</button>

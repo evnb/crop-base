@@ -213,21 +213,17 @@ body {
     white-space: nowrap;
 }
 
-#zoomLevel {
-    min-width: 60px;
-    text-align: center;
+.zoom-input-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
 }
 
-.position-info {
-    display: flex;
-    gap: 20px;
-}
-
-.coordinate-display,
-.size-display {
-    display: flex;
-    gap: 12px;
-    margin: 4px 0;
+.zoom-symbol {
+    position: absolute;
+    right: 8px;
+    pointer-events: none;
+    color: #666;
 }
 
 .number-input {
@@ -236,8 +232,22 @@ body {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
-    text-align: center;
+    text-align: right;
     background: #fff;
+}
+
+/* Remove spinner buttons from number inputs */
+.number-input::-webkit-inner-spin-button,
+.number-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.number-input[type=number] {
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .number-input:focus {
@@ -248,6 +258,14 @@ body {
 
 .zoom-controls .number-input {
     margin: 0 4px;
+    padding-right: 20px; /* Make room for the % symbol */
+}
+
+.coordinate-display,
+.size-display {
+    display: flex;
+    gap: 12px;
+    margin: 4px 0;
 }
 
 .coordinate-display .number-input,

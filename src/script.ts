@@ -297,16 +297,16 @@ class PixelPerfectEditor {
     }
 
     private handleZoomInput(): void {
-        const value = this.zoomLevelInput.value.replace('%', '');
+        const value = this.zoomLevelInput.value;
         const newZoom = parseFloat(value) / 100;
         
-        if (isNaN(newZoom) || newZoom <= 0) {
+        if (isNaN(newZoom) || newZoom < 0.1 || newZoom > 10) {
             this.updateZoomDisplay(); // Reset to current value
             return;
         }
 
         const oldZoom = this.zoomLevel;
-        this.zoomLevel = Math.max(0.1, Math.min(10, newZoom));
+        this.zoomLevel = newZoom;
         
         // Adjust pan offset to keep the center point fixed
         const centerX = this.imageCanvas.width / 2;
@@ -318,7 +318,7 @@ class PixelPerfectEditor {
     }
 
     private updateZoomDisplay(): void {
-        this.zoomLevelInput.value = `${Math.round(this.zoomLevel * 100)}%`;
+        this.zoomLevelInput.value = Math.round(this.zoomLevel * 100).toString();
     }
 
     private updateCropBoxDisplay(): void {
@@ -370,17 +370,17 @@ class PixelPerfectEditor {
         const width = parseInt(this.cropWidthInput.value);
         const height = parseInt(this.cropHeightInput.value);
 
-        if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
+        if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height) || width < 1 || height < 1) {
             this.updateCropBoxDisplay(); // Reset to current values
             return;
         }
 
-        // Update crop box with new values
+        // Update crop box with new values, ensuring minimum size
         this.cropBoxPos = {
             x: x,
             y: y,
-            width: Math.max(10, width), // Minimum size of 10px
-            height: Math.max(10, height)
+            width: Math.max(1, width),
+            height: Math.max(1, height)
         };
 
         this.render();
