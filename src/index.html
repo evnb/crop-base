@@ -50,12 +50,24 @@
                 </div>
                 <div class="position-info">
                     <div class="coordinate-display">
-                        <span>X: <input type="number" id="cropX" value="0" class="number-input" title="X coordinate">px</span>
-                        <span>Y: <input type="number" id="cropY" value="0" class="number-input" title="Y coordinate">px</span>
+                        <span>X: <div class="unit-input-container">
+                            <input type="number" id="cropX" value="0" class="number-input" title="X coordinate">
+                            <span class="unit-symbol">px</span>
+                        </div></span>
+                        <span>Y: <div class="unit-input-container">
+                            <input type="number" id="cropY" value="0" class="number-input" title="Y coordinate">
+                            <span class="unit-symbol">px</span>
+                        </div></span>
                     </div>
                     <div class="size-display">
-                        <span>W: <input type="number" id="cropWidth" value="0" min="1" class="number-input" title="Width">px</span>
-                        <span>H: <input type="number" id="cropHeight" value="0" min="1" class="number-input" title="Height">px</span>
+                        <span>W: <div class="unit-input-container">
+                            <input type="number" id="cropWidth" value="0" min="1" class="number-input" title="Width">
+                            <span class="unit-symbol">px</span>
+                        </div></span>
+                        <span>H: <div class="unit-input-container">
+                            <input type="number" id="cropHeight" value="0" min="1" class="number-input" title="Height">
+                            <span class="unit-symbol">px</span>
+                        </div></span>
                     </div>
                 </div>
                 <button id="applyCrop" class="primary-button" disabled>Apply Crop</button>
