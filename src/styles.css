@@ -198,7 +198,19 @@ body {
 .zoom-controls {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.zoom-controls button {
+    min-width: 32px;
+    padding: 4px 8px;
+}
+
+.zoom-controls #zoomToFit,
+.zoom-controls #zoomToCrop {
+    margin-left: 8px;
+    white-space: nowrap;
 }
 
 #zoomLevel {

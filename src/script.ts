@@ -37,6 +37,8 @@ class PixelPerfectEditor {
     private readonly ctx: CanvasRenderingContext2D;
     private readonly zoomInBtn: HTMLButtonElement;
     private readonly zoomOutBtn: HTMLButtonElement;
+    private readonly zoomToFitBtn: HTMLButtonElement;
+    private readonly zoomToCropBtn: HTMLButtonElement;
     private readonly zoomLevelDisplay: HTMLElement;
     private readonly cropXDisplay: HTMLElement;
     private readonly cropYDisplay: HTMLElement;
@@ -90,6 +92,8 @@ class PixelPerfectEditor {
         // Zoom controls
         const zoomInBtn = document.getElementById('zoomIn');
         const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomToFitBtn = document.getElementById('zoomToFit');
+        const zoomToCropBtn = document.getElementById('zoomToCrop');
         const zoomLevelDisplay = document.getElementById('zoomLevel');
         
         if (!zoomInBtn || !(zoomInBtn instanceof HTMLButtonElement)) {
@@ -98,12 +102,20 @@ class PixelPerfectEditor {
         if (!zoomOutBtn || !(zoomOutBtn instanceof HTMLButtonElement)) {
             throw new Error('Zoom out button not found');
         }
+        if (!zoomToFitBtn || !(zoomToFitBtn instanceof HTMLButtonElement)) {
+            throw new Error('Zoom to fit button not found');
+        }
+        if (!zoomToCropBtn || !(zoomToCropBtn instanceof HTMLButtonElement)) {
+            throw new Error('Zoom to crop button not found');
+        }
         if (!zoomLevelDisplay) {
             throw new Error('Zoom level display not found');
         }
 
         this.zoomInBtn = zoomInBtn;
         this.zoomOutBtn = zoomOutBtn;
+        this.zoomToFitBtn = zoomToFitBtn;
+        this.zoomToCropBtn = zoomToCropBtn;
         this.zoomLevelDisplay = zoomLevelDisplay;
         
         // Position display elements
@@ -139,6 +151,8 @@ class PixelPerfectEditor {
         
         this.zoomInBtn.addEventListener('click', () => this.zoom(1.25));
         this.zoomOutBtn.addEventListener('click', () => this.zoom(0.8));
+        this.zoomToFitBtn.addEventListener('click', () => this.zoomToFit());
+        this.zoomToCropBtn.addEventListener('click', () => this.zoomToCrop());
         
         // Convert mouse events to pointer events
         this.imageCanvas.addEventListener('pointerdown', this.handleCanvasMouseDown.bind(this));
@@ -185,25 +199,59 @@ class PixelPerfectEditor {
     }
 
     private resetView(): void {
-        this.zoomLevel = 1;
-        this.panOffset = { x: 0, y: 0 };
+        if (!this.image) return;
+
+        // Get container dimensions
+        const container = this.imageCanvas.parentElement;
+        if (!container) return;
+
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        // Calculate zoom to fit
+        const scaleX = containerWidth / this.image.width;
+        const scaleY = containerHeight / this.image.height;
+        this.zoomLevel = Math.min(scaleX, scaleY, 1); // Don't zoom in past 100% for large images
+
+        // For very small images (like pixel art), ensure they're at least 1/4 of the container
+        const minScale = Math.max(
+            containerWidth * 0.25 / this.image.width,
+            containerHeight * 0.25 / this.image.height
+        );
+        this.zoomLevel = Math.max(this.zoomLevel, minScale);
+
+        // Center the image
+        this.panOffset = {
+            x: (containerWidth - this.image.width * this.zoomLevel) / 2,
+            y: (containerHeight - this.image.height * this.zoomLevel) / 2
+        };
+
         this.updateZoomDisplay();
     }
 
     private initializeCanvas(): void {
         if (!this.image) return;
 
-        // Set canvas size to match image dimensions
-        this.imageCanvas.width = this.image.width;
-        this.imageCanvas.height = this.image.height;
+        // Set canvas size to match container
+        const container = this.imageCanvas.parentElement;
+        if (!container) return;
+
+        this.imageCanvas.width = container.clientWidth;
+        this.imageCanvas.height = container.clientHeight;
         
-        // Initialize crop box to center of image
-        const defaultCropSize = Math.min(this.image.width, this.image.height) / 2;
+        // Initialize crop box relative to image size and zoom level
+        const defaultCropSize = Math.min(
+            this.image.width * this.zoomLevel,
+            this.image.height * this.zoomLevel,
+            Math.min(this.image.width, this.image.height) // Don't make crop larger than image
+        ) / 2;
+
+        // Center crop box on image
         this.cropBoxPos = {
-            x: (this.image.width - defaultCropSize) / 2,
-            y: (this.image.height - defaultCropSize) / 2,
-            width: defaultCropSize,
-            height: defaultCropSize
+            x: (this.image.width - defaultCropSize / this.zoomLevel) / 2,
+            y: (this.image.height - defaultCropSize / this.zoomLevel) / 2,
+            width: defaultCropSize / this.zoomLevel,
+            height: defaultCropSize / this.zoomLevel
         };
         
         this.updateCropBoxDisplay();
@@ -464,6 +512,68 @@ class PixelPerfectEditor {
         e.preventDefault();
         const factor = e.deltaY > 0 ? 0.9 : 1.1;
         this.zoom(factor);
+    }
+
+    private zoomToFit(): void {
+        if (!this.image) return;
+
+        const container = this.imageCanvas.parentElement;
+        if (!container) return;
+
+        // Calculate zoom to fit
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        const scaleX = containerWidth / this.image.width;
+        const scaleY = containerHeight / this.image.height;
+        const newZoom = Math.min(scaleX, scaleY);
+
+        // Store old zoom for pan adjustment
+        const oldZoom = this.zoomLevel;
+        this.zoomLevel = newZoom;
+
+        // Center the image
+        this.panOffset = {
+            x: (containerWidth - this.image.width * this.zoomLevel) / 2,
+            y: (containerHeight - this.image.height * this.zoomLevel) / 2
+        };
+
+        this.updateZoomDisplay();
+        this.render();
+    }
+
+    private zoomToCrop(): void {
+        if (!this.image) return;
+
+        const container = this.imageCanvas.parentElement;
+        if (!container) return;
+
+        // Calculate zoom to fit crop box
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        const cropWidth = this.cropBoxPos.width;
+        const cropHeight = this.cropBoxPos.height;
+
+        // Add padding around crop box (20% of container)
+        const padding = Math.min(containerWidth, containerHeight) * 0.2;
+        const scaleX = (containerWidth - padding) / cropWidth;
+        const scaleY = (containerHeight - padding) / cropHeight;
+        const newZoom = Math.min(scaleX, scaleY);
+
+        // Store old zoom for pan adjustment
+        const oldZoom = this.zoomLevel;
+        this.zoomLevel = newZoom;
+
+        // Center the crop box
+        const cropCenterX = this.cropBoxPos.x + cropWidth / 2;
+        const cropCenterY = this.cropBoxPos.y + cropHeight / 2;
+
+        this.panOffset = {
+            x: containerWidth / 2 - cropCenterX * this.zoomLevel,
+            y: containerHeight / 2 - cropCenterY * this.zoomLevel
+        };
+
+        this.updateZoomDisplay();
+        this.render();
     }
 }
 
