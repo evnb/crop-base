@@ -147,13 +147,13 @@ body {
 .top-edge, .bottom-edge {
     width: calc(100% - 20px);  /* Full width minus corner handles (10px on each side) */
     height: 10px;
-    left: 5px;  /* Half of corner handle width to center */
+    left: 10px;  /* Full corner handle width to properly center */
 }
 
 .left-edge, .right-edge {
     height: calc(100% - 20px);  /* Full height minus corner handles (10px on each side) */
     width: 10px;
-    top: 5px;  /* Half of corner handle height to center */
+    top: 10px;  /* Full corner handle height to properly center */
     cursor: ew-resize;
 }
 
@@ -167,19 +167,19 @@ body {
 }
 
 .top-edge::after, .bottom-edge::after {
-    width: 30px;  /* Back to original size */
-    height: 10px;  /* Back to original size */
+    width: 30px;
+    height: 10px;
     left: 50%;
     transform: translateX(-50%);
-    top: 0;  /* Align with the edge */
+    top: 0;
 }
 
 .left-edge::after, .right-edge::after {
-    width: 10px;  /* Back to original size */
-    height: 30px;  /* Back to original size */
+    width: 10px;
+    height: 30px;
     top: 50%;
     transform: translateY(-50%);
-    left: 0;  /* Align with the edge */
+    left: 0;
 }
 
 .top-edge { top: -5px; }
