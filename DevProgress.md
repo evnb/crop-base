@@ -15,7 +15,7 @@
    - [x] Implement proper crop box movement independent of view
    - [ ] Add proper boundary handling for crop box
    - [ ] Improve image loading and positioning
-     - [ ] Center image and fit to frame on initial load
+     - [x] Center image and fit to frame on initial load
      - [ ] Center image when zoomed out with whitespace
      - [ ] Support very low resolution images (pixel art)
    - [ ] Enhance zoom functionality
@@ -76,11 +76,17 @@
   - Fixed edge handle centering both along and across edges
   - Standardized handle sizes and border behavior
   - Improved visual consistency of resize handles
+- Enhanced image loading and zoom functionality
+  - Images now automatically center and scale on load
+  - Added support for small/pixel art images with minimum scale
+  - Implemented "Zoom to Fit Image" and "Zoom to Fit Crop" features
+  - Canvas now matches container size for better viewport usage
 
 ### Current Challenges
 - Need to establish proper coordinate system for pixel-perfect operations
 - Design system for handling zoom levels while maintaining exact pixel positions
 - Plan UI/UX for intuitive crop box manipulation
+- Implement manual input for precise control of zoom and dimensions
 - Resolved visual alignment issues with crop box handles
 
 ### Attempted Solutions
@@ -93,6 +99,10 @@
   - Properly accounting for border-box sizing
   - Adjusting base positioning offsets for edge handles
   - Standardizing handle dimensions and spacing
+- Improved image handling by:
+  - Calculating optimal initial zoom based on container size
+  - Adding minimum scale for small images
+  - Implementing smart zoom-to-fit functions
 
 ### Key Insights
 - Previous attempts highlighted need for clean separation between view panning and crop box
@@ -101,6 +111,8 @@
 - End-to-end testing helps catch UI interaction issues early
 - Proper event handling is crucial for consistent behavior across browsers
 - Visual alignment requires careful consideration of CSS box model and border behavior
+- Small images need special handling to remain usable in the interface
+- Zoom levels should adapt to both image and container size
 
 ### Current State
 - TypeScript conversion complete
